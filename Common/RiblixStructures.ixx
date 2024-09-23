@@ -453,18 +453,17 @@ export
 		/* 66*/ bool _4;
 		/* 67*/ bool sandboxed;
 		/* 72*/ const char* name;
-		/* 80*/ void* _5;
-		/* 88*/ msvc_shared_ptr<msvc_vector<msvc_shared_ptr<Instance>>> children;
-		/* 104*/ Instance* parent;
-		/* 112*/ struct {
+		/* 80*/ msvc_shared_ptr<msvc_vector<msvc_shared_ptr<Instance>>> children;
+		/* 96*/ Instance* parent;
+		/* 104*/ struct {
 			size_t uniqueId;
 			size_t _1;
 			size_t historyId;
 		} *history;
-		/* 120*/ int _6[2];
-		/* 136*/ int numExpectedChildren;
-		/* 140*/ int _7[3];
-		/* 152*/ OnDemandInstance* _8;
+		/* 112*/ int _6[2];
+		/* 128*/ int numExpectedChildren;
+		/* 132*/ int _7[3];
+		/* 144*/ OnDemandInstance* _8;
 
 		std::string getClassName()
 		{
