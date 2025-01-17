@@ -1,55 +1,63 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Monaco Editor</title>
-    <link rel='stylesheet' href='vs/editor/editor.main.css'>
-    <script src='vs/loader.js'></script>
-    <script>
-        require.config({ paths: { 'vs': 'vs' }});
-        require(['vs/editor/editor.main'], function (){
-            window.editor = monaco.editor.create(document.getElementById('container'), {
-                value: 'print("Carbon")',
-                language: 'lua',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                codeLens: true,
-                contextmenu: true,
-                folding: true,
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                minimap: {
-                    enabled: true,
-                },
-                suggestOnTriggerCharacters: true,
-                quickSuggestions: { other: true, comments: true, strings: true },
-                parameterHints: { enabled: true },
-                formatOnType: true,
-                formatOnPaste: true,
-                snippetSuggestions: 'inline',
-            });
-        });
+	<meta charset='UTF-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<title>Monaco Editor</title>
+	<link rel='stylesheet' href='vs/editor/editor.main.css'>
+	<script src='vs/loader.js'></script>
+	<script>
 
-        function getEditorContent() {
-            return window.editor.getValue();
-        }
+		let editor;
 
-        function setEditorContent(value) {
-            window.editor.setValue(value);
-        }
-    </script>
-    <style>
-        html, body, #container {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-    </style>
+		require.config({ paths: { 'vs': 'vs' }});
+		require(['vs/editor/editor.main'], function (){
+			editor = monaco.editor.create(document.getElementById('container'), {
+				value: 'print("Carbon")',
+				language: 'lua',
+				theme: 'vs-dark',
+				automaticLayout: true,
+				codeLens: true,
+				contextmenu: true,
+				folding: true,
+				lineNumbers: 'on',
+				scrollBeyondLastLine: false,
+				wordWrap: 'off',
+				minimap: {
+					enabled: true,
+				},
+				suggestOnTriggerCharacters: true,
+				quickSuggestions: { other: true, comments: true, strings: true },
+				parameterHints: { enabled: true },
+				formatOnType: true,
+				formatOnPaste: true,
+				snippetSuggestions: 'inline',
+			});
+		});
+
+		function getEditorContent() {
+			return editor.getValue();
+		}
+
+		function setEditorContent(value) {
+			editor.setValue(value);
+		}
+
+		// TODO: use it
+		function serWordWrapEnabled(value) {
+			editor.updateOptions({ wordWrap : (value ? 'on' : 'off') })
+		}
+	</script>
+	<style>
+		html, body, #container {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
 </head>
 <body>
-    <div id='container'></div>
+	<div id='container'></div>
 </body>
 </html>

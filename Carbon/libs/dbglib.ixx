@@ -69,55 +69,55 @@ bool pushDescriptorsTable(lua_State* L, const char* categoryName, Instance* inst
 {
 	auto classDescriptor = instance->classDescriptor;
 
-	std::vector<MemberDescriptor*>* collection = nullptr;
+	auto pushCollection = [&](auto container) {
+
+		auto collection = container.collection;
+		lua_createtable(L, (int)collection.size(), 0);
+
+		for (auto [index, descriptor] : std::ranges::views::enumerate(collection.createViewRange()))
+		{
+			lua_pushinteger(L, (int)index + 1); // lua array style
+			lua_pushstring(L, descriptor->name->c_str());
+			lua_settable(L, -3);
+		}
+	};
+
+	std::span<MemberDescriptor*> collection;
 
 	if (strcmp_caseInsensitive(categoryName, "Property"))
 	{
-		collection = reinterpret_cast<decltype(collection)>(&classDescriptor->
-			MemberDescriptorContainer<PropertyDescriptor>::collection);
+		pushCollection(classDescriptor->properties);
 	}
 	else if (strcmp_caseInsensitive(categoryName, "Event"))
 	{
-		collection = reinterpret_cast<decltype(collection)>(&classDescriptor->
-			MemberDescriptorContainer<EventDescriptor>::collection);
+		pushCollection(classDescriptor->events);
 	}
 	else if (strcmp_caseInsensitive(categoryName, "Function"))
 	{
-		collection = reinterpret_cast<decltype(collection)>(&classDescriptor->
-			MemberDescriptorContainer<FunctionDescriptor>::collection);
+		pushCollection(classDescriptor->functions);
 	}
 	else if (strcmp_caseInsensitive(categoryName, "YieldFunction"))
 	{
-		collection = reinterpret_cast<decltype(collection)>(&classDescriptor->
-			MemberDescriptorContainer<YieldFunctionDescriptor>::collection);
+		pushCollection(classDescriptor->yieldFunctions);
 	}
 	else if (strcmp_caseInsensitive(categoryName, "Callback"))
 	{
-		collection = reinterpret_cast<decltype(collection)>(&classDescriptor->
-			MemberDescriptorContainer<CallbackDescriptor>::collection);
+		pushCollection(classDescriptor->callbacks);
 	}
-
-	if (!collection)
-		return false;
-
-	lua_createtable(L, (int)collection->size(), 0);
-
-	for (auto [index, descriptor] : std::ranges::views::enumerate(*collection))
+	else
 	{
-		lua_pushinteger(L, (int)index + 1); // lua array style
-		lua_pushstring(L, descriptor->name->c_str());
-		lua_settable(L, -3);
+		return false;
 	}
 
 	return true;
+
 }
 
 int carbon_getdescriptors(lua_State* L)
 {
 	auto instance = checkInstance(L, 1);
-	const char* name = luaL_checklstring(L, 2);
 
-	if (strcmp_caseInsensitive(name, "All"))
+	if (lua_isnoneornil(L, 2))
 	{
 		lua_createtable(L, 0, 5);
 
@@ -143,6 +143,7 @@ int carbon_getdescriptors(lua_State* L)
 	}
 	else
 	{
+		const char* name = luaL_checklstring(L, 2);
 		if (!pushDescriptorsTable(L, name, instance))
 			luaL_argerrorL(L, 2, "invalid descriptor collection name");
 	}
@@ -165,16 +166,59 @@ int carbon_getdescriptorinfo(lua_State* L)
 {
 	auto instance = checkInstance(L, 1);
 
-	const char* descriptorName = luaL_checklstring(L, 2);
+	static const int commonPropertiesCount = 9;
+	auto setCommonInfo = [&](MemberDescriptor* target) {
+		lua_pushstring(L, "Address");
+		lua_pushstring(L, Formatter::pointerToString(target).c_str());
+		lua_settable(L, -3);
 
-	MemberDescriptor* target = nullptr;
+		lua_pushstring(L, "Name");
+		lua_pushstring(L, target->name->c_str());
+		lua_settable(L, -3);
 
-	int basicPropertiesCount = 9;
+		{
+			lua_createtable(L, 0, 6);
 
-	if (auto property = instance->classDescriptor->MemberDescriptorContainer<PropertyDescriptor>::getDescriptor(descriptorName))
+			lua_pushstring(L, "Properties");
+			lua_pushvalue(L, -2);
+			lua_settable(L, -4);
+
+			lua_pushstring(L, "IsPublic");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsPublic));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "IsEditable");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsEditable));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "CanReplicate");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanReplicate));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "CanXmlRead");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanXmlRead));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "CanXmlWrite");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanXmlWrite));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "IsScriptable");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsScriptable));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "AlwaysClone");
+			lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::AlwaysClone));
+			lua_settable(L, -3);
+
+			lua_pop(L, 1);
+		}
+	};
+
+	auto createPropertyInfo = [](lua_State* L, void* _property)
 	{
-		lua_createtable(L, 0, basicPropertiesCount + 4);
-		target = property;
+		auto property = (PropertyDescriptor*)_property;
+		lua_createtable(L, 0, commonPropertiesCount + 4);
 
 		lua_pushstring(L, "Get");
 		lua_pushstring(L, Formatter::pointerToString(property->getset->get).c_str());
@@ -191,76 +235,83 @@ int carbon_getdescriptorinfo(lua_State* L)
 		lua_pushstring(L, "SetRva");
 		pushRva(L, property->getset->set);
 		lua_settable(L, -3);
-	}
-	else if (auto event = instance->classDescriptor->MemberDescriptorContainer<EventDescriptor>::getDescriptor(descriptorName))
+	};
+
+	auto createEmptyInfo = [](lua_State* L, void* = nullptr) {
+		lua_createtable(L, 0, commonPropertiesCount);
+	};
+
+	if (lua_isnoneornil(L, 2))
 	{
-		lua_createtable(L, 0, basicPropertiesCount);
-		target = event;
-	}
-	else if (auto function = instance->classDescriptor->MemberDescriptorContainer<FunctionDescriptor>::getDescriptor(descriptorName))
-	{
-		lua_createtable(L, 0, basicPropertiesCount);
-		target = function;
-	}
-	else if (auto yieldFunction = instance->classDescriptor->MemberDescriptorContainer<YieldFunctionDescriptor>::getDescriptor(descriptorName))
-	{
-		lua_createtable(L, 0, basicPropertiesCount);
-		target = yieldFunction;
-	}
-	else if (auto callback = instance->classDescriptor->MemberDescriptorContainer<CallbackDescriptor>::getDescriptor(descriptorName))
-	{
-		lua_createtable(L, 0, basicPropertiesCount);
-		target = callback;
+		auto pushCollection = [&](auto container, void(*infoCreator)(lua_State*, void*)) {
+
+			auto collection = container.collection;
+			lua_createtable(L, (int)collection.size(), 0);
+
+			for (auto [index, descriptor] : std::ranges::views::enumerate(collection.createViewRange()))
+			{
+				lua_pushstring(L, descriptor->name->c_str());
+				infoCreator(L, descriptor);
+				setCommonInfo(descriptor);
+				lua_settable(L, -3);
+			}
+		};
+
+		lua_createtable(L, 0, 5);
+
+		lua_pushstring(L, "Property");
+		pushCollection(instance->classDescriptor->properties, createPropertyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Event");
+		pushCollection(instance->classDescriptor->events, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Function");
+		pushCollection(instance->classDescriptor->functions, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "YieldFunction");
+		pushCollection(instance->classDescriptor->yieldFunctions, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Callback");
+		pushCollection(instance->classDescriptor->callbacks, createEmptyInfo);
+		lua_settable(L, -3);
 	}
 	else
 	{
-		luaL_argerrorL(L, 2, "invalid descriptor name");
-	}
+		const char* descriptorName = luaL_checklstring(L, 2);
 
-	lua_pushstring(L, "Address");
-	lua_pushstring(L, Formatter::pointerToString(target).c_str());
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Name");
-	lua_pushstring(L, descriptorName);
-	lua_settable(L, -3);
-
-	{
-		lua_createtable(L, 0, 6);
-
-		lua_pushstring(L, "Properties");
-		lua_pushvalue(L, -2);
-		lua_settable(L, -4);
-
-		lua_pushstring(L, "IsPublic");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsPublic));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "IsEditable");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsEditable));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "CanReplicate");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanReplicate));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "CanXmlRead");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanXmlRead));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "CanXmlWrite");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::CanXmlWrite));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "IsScriptable");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::IsScriptable));
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "AlwaysClone");
-		lua_pushboolean(L, target->properties.isSet(DescriptorMemberProperties::AlwaysClone));
-		lua_settable(L, -3);
-
-		lua_pop(L, 1);
+		if (auto property = instance->classDescriptor->properties.getDescriptor(descriptorName))
+		{
+			createPropertyInfo(L, property);
+			setCommonInfo(property);
+		}
+		else if (auto event = instance->classDescriptor->events.getDescriptor(descriptorName))
+		{
+			createEmptyInfo(L);
+			setCommonInfo(event);
+		}
+		else if (auto function = instance->classDescriptor->functions.getDescriptor(descriptorName))
+		{
+			createEmptyInfo(L);
+			setCommonInfo(function);
+		}
+		else if (auto yieldFunction = instance->classDescriptor->yieldFunctions.getDescriptor(descriptorName))
+		{
+			createEmptyInfo(L);
+			setCommonInfo(yieldFunction);
+		}
+		else if (auto callback = instance->classDescriptor->callbacks.getDescriptor(descriptorName))
+		{
+			createEmptyInfo(L);
+			setCommonInfo(callback);
+		}
+		else
+		{
+			luaL_argerrorL(L, 2, "invalid descriptor name");
+		}
 	}
 
 	return 1;

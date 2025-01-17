@@ -305,16 +305,18 @@ struct lua_Callbacks
 {
     void* userdata; // arbitrary userdata pointer that is never overwritten by Luau
 
-    void *interrupt;  // gets called at safepoints (loop back edges, call/ret, gc) if set
-    void *panic; // gets called when an unprotected error is raised (if longjmp is used)
+    void (*interrupt)(lua_State* L, int gc);  // gets called at safepoints (loop back edges, call/ret, gc) if set
+    void (*panic)(lua_State* L, int errcode); // gets called when an unprotected error is raised (if longjmp is used)
 
-    void *userthread; // gets called when L is created (LP == parent) or destroyed (LP == NULL)
-    int16_t*useratom;    // gets called when a string is created; returned atom can be retrieved via tostringatom
+    void (*userthread)(lua_State* LP, lua_State* L); // gets called when L is created (LP == parent) or destroyed (LP == NULL)
+    int16_t(*useratom)(const char* s, size_t l);    // gets called when a string is created; returned atom can be retrieved via tostringatom
 
-    void *debugbreak;     // gets called when BREAK instruction is encountered
-    void *debugstep;      // gets called after each instruction in single step mode
-    void *debuginterrupt; // gets called when thread execution is interrupted by break in another thread
-    void *debugprotectederror;           // gets called when protected call results in an error
+    void (*debugbreak)(lua_State* L, lua_Debug* ar);     // gets called when BREAK instruction is encountered
+    void (*debugstep)(lua_State* L, lua_Debug* ar);      // gets called after each instruction in single step mode
+    void (*debuginterrupt)(lua_State* L, lua_Debug* ar); // gets called when thread execution is interrupted by break in another thread
+    void (*debugprotectederror)(lua_State* L);           // gets called when protected call results in an error
+
+    void (*onallocate)(lua_State* L, size_t osize, size_t nsize); // gets called when memory is allocated
 };
 
 typedef void* (*lua_Alloc)(void* ud, void* ptr, size_t osize, size_t nsize);
@@ -327,6 +329,7 @@ struct lua_ExecutionCallbacks
     int (*enter)(lua_State* L, Proto* proto);    // called when function is about to start/resume (when execdata is present), return 0 to exit VM
     void (*disable)(lua_State* L, Proto* proto); // called when function has to be switched from native to bytecode in the debugger
     size_t(*getmemorysize)(lua_State* L, Proto* proto); // called to request the size of memory associated with native part of the Proto
+    uint8_t(*gettypemapping)(lua_State* L, const char* str, size_t len); // called to get the userdata type index
 };
 
 struct GCStats
@@ -394,11 +397,12 @@ struct global_State
     uint64_t rngstate; // PCG random number generator state
     uint64_t ptrenckey[4]; // pointer encoding key for display
 
-    char cb[72];
+    void* cb[10];
 
     lua_ExecutionCallbacks ecb;
 
     void (*udatagc[128])(lua_State*, void*); // for each userdata tag, a gc callback to be called immediately before freeing memory
+    Table* udatamt[128]; // metatables for tagged userdata
 
     TString* lightuserdataname[128]; // names for tagged lightuserdata
 

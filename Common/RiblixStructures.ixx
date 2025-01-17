@@ -3,6 +3,7 @@ export module RiblixStructures;
 import <string>;
 import <vector>;
 import <memory>;
+import <span>;
 
 export
 {
@@ -48,6 +49,7 @@ export
 		value_type* limit;
 
 		bool empty() const { return first == last; }
+		size_t size() const { return last - first; }
 
 		template<typename value_type>
 		struct vector_iterator
@@ -122,6 +124,12 @@ export
 		const_iterator end() const noexcept { return const_iterator(last); }
 		const_iterator cbegin() const noexcept { return const_iterator(first); }
 		const_iterator cend() const noexcept { return const_iterator(last); }
+
+		std::span<value_type> createViewRange()
+		{
+			return std::span<value_type>(first, last);
+		}
+
 	};
 
 
@@ -197,7 +205,7 @@ export
 	{
 		void* vftable;
 		const msvc_string* name;
-		size_t _1;
+		void* _1;
 		size_t _2;
 		size_t _3;
 	};
@@ -243,9 +251,7 @@ export
 		struct GetSet {
 			void* vftable;
 			void* get;
-			void* _1;
 			void* set;
-			void* _2;
 		} *getset;
 	};
 
@@ -278,7 +284,7 @@ export
 	template <typename Member>
 	struct __declspec(novtable) MemberDescriptorContainer
 	{
-		std::vector<Member*> collection;
+		msvc_vector<Member*> collection;
 		char __pad[168 - sizeof(collection)];
 
 		Member* getDescriptor(const char* name) const
@@ -288,16 +294,23 @@ export
 					return member;
 			return nullptr;
 		}
+
+		MemberDescriptorContainer<MemberDescriptor>& toBase()
+		{
+			using base = MemberDescriptorContainer<MemberDescriptor>;
+			return *reinterpret_cast<base*>(this);
+		}
 	};
 
 	struct __declspec(novtable) ClassDescriptor
 		: public Descriptor
-		, public MemberDescriptorContainer<PropertyDescriptor>
-		, public MemberDescriptorContainer<EventDescriptor>
-		, public MemberDescriptorContainer<FunctionDescriptor>
-		, public MemberDescriptorContainer<YieldFunctionDescriptor>
-		, public MemberDescriptorContainer<CallbackDescriptor>
 	{
+		MemberDescriptorContainer<PropertyDescriptor> properties;
+		MemberDescriptorContainer<EventDescriptor> events;
+		MemberDescriptorContainer<FunctionDescriptor> functions;
+		MemberDescriptorContainer<YieldFunctionDescriptor> yieldFunctions;
+		MemberDescriptorContainer<CallbackDescriptor> callbacks;
+
 		void* _1;
 		void* _2;
 		unsigned _3 : 4;
@@ -305,15 +318,15 @@ export
 
 		MemberDescriptor* getMemberDescriptor(const char* name) const
 		{
-			if (auto property = MemberDescriptorContainer<PropertyDescriptor>::getDescriptor(name))
+			if (auto property = properties.getDescriptor(name))
 				return property;
-			else if (auto event = MemberDescriptorContainer<EventDescriptor>::getDescriptor(name))
+			else if (auto event = events.getDescriptor(name))
 				return event;
-			else if (auto function = MemberDescriptorContainer<FunctionDescriptor>::getDescriptor(name))
+			else if (auto function = functions.getDescriptor(name))
 				return function;
-			else if (auto yieldFunction = MemberDescriptorContainer<YieldFunctionDescriptor>::getDescriptor(name))
+			else if (auto yieldFunction = yieldFunctions.getDescriptor(name))
 				return yieldFunction;
-			else if (auto callback = MemberDescriptorContainer<CallbackDescriptor>::getDescriptor(name))
+			else if (auto callback = callbacks.getDescriptor(name))
 				return callback;
 
 			return nullptr;
@@ -455,15 +468,15 @@ export
 		/* 72*/ const char* name;
 		/* 80*/ msvc_shared_ptr<msvc_vector<msvc_shared_ptr<Instance>>> children;
 		/* 96*/ Instance* parent;
-		/*104*/ struct {
+		/* 104*/ struct {
 			size_t uniqueId;
 			size_t _1;
 			size_t historyId;
 		} *history;
-		/*108*/ int _6[2];
-		/*120*/ int numExpectedChildren;
-		/*124*/ int _7[3];
-		/*136*/ OnDemandInstance* _8;
+		/* 112*/ int _6[2];
+		/* 128*/ int numExpectedChildren;
+		/* 132*/ int _7[3];
+		/* 144*/ OnDemandInstance* _8;
 
 		std::string getClassName()
 		{
