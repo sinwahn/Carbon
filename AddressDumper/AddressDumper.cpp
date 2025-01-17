@@ -398,7 +398,7 @@ FunctionData getNextFunction(const FunctionData& functionData)
 	}
 }
 
-// bind specially for luaopen_base
+// build specially for luaopen_base
 // may not be perfect but works fine on that simple jumpless function
 class FunctionCallAnalyzer_Fastcall
 {
@@ -1240,33 +1240,6 @@ public:
 			state.post();
 		}
 
-	}
-
-	template <typename T>
-	std::remove_pointer_t<std::remove_pointer_t<T>>* resolveExternalPointer(ExternalAddress address) const
-	{
-		uintptr_t current = address.get();
-		uintptr_t resolved = 0;
-
-		while (true)
-		{
-			// Resolve the current pointer layer
-			resolved = (uintptr_t)translatePointerNoThrow(ExternalAddress(current));
-			if (!resolved)
-				raise("Invalid pointer encountered during resolution.");
-
-			// Check if this is the final layer
-			if constexpr (std::is_pointer_v<std::remove_pointer_t<T>>)
-			{
-				// If T is a pointer to a pointer, continue to the next layer
-				current = *(uintptr_t*)resolved;
-			}
-			else
-			{
-				// If T is the target type (not a pointer to another pointer), we're done
-				return (std::remove_pointer_t<T>*)resolved;
-			}
-		}
 	}
 
 	DisassemblerState createCodeDisasmState()
