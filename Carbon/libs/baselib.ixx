@@ -153,33 +153,6 @@ const char* getCapabilityName(Capabilities::CapabilityType capability_) {
 	return "Unknown";
 }
 
-<<<<<<< HEAD:Coal/libs/baselib.ixx
-Capabilities::CapabilityType nameToCapability(const char* name)
-{
-	if (strcmp_caseInsensitive(name, "All")) return Capabilities::All;
-	if (strcmp_caseInsensitive(name, "Restricted")) return Capabilities::Restricted;
-	if (strcmp_caseInsensitive(name, "Plugin")) return Capabilities::Plugin;
-	if (strcmp_caseInsensitive(name, "LocalUser")) return Capabilities::LocalUser;
-	if (strcmp_caseInsensitive(name, "WritePlayer")) return Capabilities::WritePlayer;
-	if (strcmp_caseInsensitive(name, "RobloxScript")) return Capabilities::RobloxScript;
-	if (strcmp_caseInsensitive(name, "RobloxEngine")) return Capabilities::RobloxEngine;
-	if (strcmp_caseInsensitive(name, "NotAccessible")) return Capabilities::NotAccessible;
-	if (strcmp_caseInsensitive(name, "RunClientScript")) return Capabilities::RunClientScript;
-	if (strcmp_caseInsensitive(name, "RunServerScript")) return Capabilities::RunServerScript;
-	if (strcmp_caseInsensitive(name, "AccessOutsideWrite")) return Capabilities::AccessOutsideWrite;
-	if (strcmp_caseInsensitive(name, "SpecialCapability")) return Capabilities::SpecialCapability;
-	if (strcmp_caseInsensitive(name, "AssetRequire")) return Capabilities::AssetRequire;
-	if (strcmp_caseInsensitive(name, "LoadString")) return Capabilities::LoadString;
-	if (strcmp_caseInsensitive(name, "ScriptGlobals")) return Capabilities::ScriptGlobals;
-	if (strcmp_caseInsensitive(name, "CreateInstances")) return Capabilities::CreateInstances;
-	if (strcmp_caseInsensitive(name, "Basic")) return Capabilities::Basic;
-	if (strcmp_caseInsensitive(name, "Audio")) return Capabilities::Audio;
-	if (strcmp_caseInsensitive(name, "DataStore")) return Capabilities::DataStore;
-	if (strcmp_caseInsensitive(name, "Network")) return Capabilities::Network;
-	if (strcmp_caseInsensitive(name, "Physics")) return Capabilities::Physics;
-
-	return Capabilities::Restricted;
-=======
 Capabilities::CapabilityType nameToCapability(const char* name) {
 	using enum Capabilities::CapabilityType;
 	if (strcmp_caseInsensitive(name, "Restricted")) return Restricted;
@@ -219,7 +192,6 @@ Capabilities::CapabilityType nameToCapability(const char* name) {
 	if (strcmp_caseInsensitive(name, "Unknown")) return Unknown;
 	if (strcmp_caseInsensitive(name, "All")) return All;
 	return Restricted;
->>>>>>> f0ff9a0 (- Automatic structure offset analyzer):Carbon/libs/baselib.ixx
 }
 
 int carbon_setcapability(lua_State* L)
@@ -303,7 +275,7 @@ int carbon_getcallingscript(lua_State* L)
 {
 	auto extraSpace = L->userdata;
 	if (auto script = extraSpace->script)
-		InstanceBridge_pushshared(L, script->shared.lock());
+		InstanceBridge_pushshared(L, script->getSelf().lock());
 	else
 		lua_pushnil(L);
 

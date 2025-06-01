@@ -9,7 +9,7 @@ import RiblixStructures;
 import StringUtils;
 import Formatter;
 
-int carbon_disablepointerencoding(lua_State* L);
+export int carbon_disablepointerencoding(lua_State* L);
 int carbon_getdescriptors(lua_State* L);
 int carbon_getdescriptorinfo(lua_State* L);
 int carbon_getscriptcontext(lua_State* L);

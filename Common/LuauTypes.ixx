@@ -380,7 +380,7 @@ export
 
 		struct Table* gt;           // table of globals
 		struct UpVal* openupval;    // list of open upvalues in this stack
-		struct GCObject* gclist;
+		union GCObject* gclist;
 
 		TString* namecall; // when invoked from Luau using NAMECALL, what method do we need to invoke?
 

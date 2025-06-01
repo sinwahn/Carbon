@@ -521,7 +521,7 @@ export
 		}
 	};
 
-	struct RobloxExtraSpace
+	struct RobloxExtraSpace : Address
 	{
 		// intrusive set stuff
 		RobloxExtraSpace* _1;

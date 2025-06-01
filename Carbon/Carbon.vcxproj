@@ -216,7 +216,9 @@
     <ClCompile Include="..\Common\Formatter.ixx" />
     <ClCompile Include="..\Common\LuauTypes.ixx" />
     <ClCompile Include="..\Common\Pipes.ixx" />
+    <ClCompile Include="..\Common\RiblixStructureOffsets.ixx" />
     <ClCompile Include="..\Common\RiblixStructures.ixx" />
+    <ClCompile Include="..\Common\RttiDescriptorContainer.ixx" />
     <ClCompile Include="..\Common\SharedAddresses.ixx" />
     <ClCompile Include="..\Common\StringUtils.ixx" />
     <ClCompile Include="Console.ixx" />
