@@ -3,6 +3,8 @@ export module RiblixStructures;
 import <string>;
 import <vector>;
 import <memory>;
+import <span>;
+import RiblixStructureOffsets;
 
 export
 {
@@ -48,6 +50,7 @@ export
 		value_type* limit;
 
 		bool empty() const { return first == last; }
+		size_t size() const { return last - first; }
 
 		template<typename value_type>
 		struct vector_iterator
@@ -122,6 +125,12 @@ export
 		const_iterator end() const noexcept { return const_iterator(last); }
 		const_iterator cbegin() const noexcept { return const_iterator(first); }
 		const_iterator cend() const noexcept { return const_iterator(last); }
+
+		std::span<value_type> createViewRange()
+		{
+			return std::span<value_type>(first, last);
+		}
+
 	};
 
 
@@ -197,7 +206,7 @@ export
 	{
 		void* vftable;
 		const msvc_string* name;
-		size_t _1;
+		void* _1;
 		size_t _2;
 		size_t _3;
 	};
@@ -243,9 +252,7 @@ export
 		struct GetSet {
 			void* vftable;
 			void* get;
-			void* _1;
 			void* set;
-			void* _2;
 		} *getset;
 	};
 
@@ -278,7 +285,7 @@ export
 	template <typename Member>
 	struct __declspec(novtable) MemberDescriptorContainer
 	{
-		std::vector<Member*> collection;
+		msvc_vector<Member*> collection;
 		char __pad[168 - sizeof(collection)];
 
 		Member* getDescriptor(const char* name) const
@@ -288,16 +295,23 @@ export
 					return member;
 			return nullptr;
 		}
+
+		MemberDescriptorContainer<MemberDescriptor>& toBase()
+		{
+			using base = MemberDescriptorContainer<MemberDescriptor>;
+			return *reinterpret_cast<base*>(this);
+		}
 	};
 
 	struct __declspec(novtable) ClassDescriptor
 		: public Descriptor
-		, public MemberDescriptorContainer<PropertyDescriptor>
-		, public MemberDescriptorContainer<EventDescriptor>
-		, public MemberDescriptorContainer<FunctionDescriptor>
-		, public MemberDescriptorContainer<YieldFunctionDescriptor>
-		, public MemberDescriptorContainer<CallbackDescriptor>
 	{
+		MemberDescriptorContainer<PropertyDescriptor> properties;
+		MemberDescriptorContainer<EventDescriptor> events;
+		MemberDescriptorContainer<FunctionDescriptor> functions;
+		MemberDescriptorContainer<YieldFunctionDescriptor> yieldFunctions;
+		MemberDescriptorContainer<CallbackDescriptor> callbacks;
+
 		void* _1;
 		void* _2;
 		unsigned _3 : 4;
@@ -305,15 +319,15 @@ export
 
 		MemberDescriptor* getMemberDescriptor(const char* name) const
 		{
-			if (auto property = MemberDescriptorContainer<PropertyDescriptor>::getDescriptor(name))
+			if (auto property = properties.getDescriptor(name))
 				return property;
-			else if (auto event = MemberDescriptorContainer<EventDescriptor>::getDescriptor(name))
+			else if (auto event = events.getDescriptor(name))
 				return event;
-			else if (auto function = MemberDescriptorContainer<FunctionDescriptor>::getDescriptor(name))
+			else if (auto function = functions.getDescriptor(name))
 				return function;
-			else if (auto yieldFunction = MemberDescriptorContainer<YieldFunctionDescriptor>::getDescriptor(name))
+			else if (auto yieldFunction = yieldFunctions.getDescriptor(name))
 				return yieldFunction;
-			else if (auto callback = MemberDescriptorContainer<CallbackDescriptor>::getDescriptor(name))
+			else if (auto callback = callbacks.getDescriptor(name))
 				return callback;
 
 			return nullptr;
@@ -323,7 +337,7 @@ export
 	class Capabilities
 	{
 	public:
-		enum CapabilityType : uint32_t {
+		enum CapabilityType : uint64_t {
 			Restricted = 0,
 			Plugin = 1ULL << 0,
 			LocalUser = 1ULL << 1,
@@ -331,10 +345,12 @@ export
 			RobloxScript = 1ULL << 3,
 			RobloxEngine = 1ULL << 4,
 			NotAccessible = 1ULL << 5,
+
 			RunClientScript = 1ULL << 8,
 			RunServerScript = 1ULL << 9,
 			AccessOutsideWrite = 1ULL << 11,
-			SpecialCapability = 1ULL << 15,
+
+			Unassigned = 1ULL << 15,
 			AssetRequire = 1ULL << 16,
 			LoadString = 1ULL << 17,
 			ScriptGlobals = 1ULL << 18,
@@ -344,37 +360,40 @@ export
 			DataStore = 1ULL << 22,
 			Network = 1ULL << 23,
 			Physics = 1ULL << 24,
+			UI = 1ULL << 25,
+			CSG = 1ULL << 26,
+			Chat = 1ULL << 27,
+			Animation = 1ULL << 28,
+			Avatar = 1ULL << 29,
+			Input = 1ULL << 30,
+			Environment = 1ULL << 31,
+			RemoteEvent = 1ULL << 32,
+			LegacySound = 1ULL << 33,
+			Players = 1ULL << 34,
+			CapabilityControl = 1ULL << 35,
 
-			// TODO: capabilities are not inherited, find something better
-			Dummy = 1ULL << 25, // use this one as our thread marking
+			OurThread = 1ULL << 42,
 
-			OurThread = Dummy,
-			All = Plugin
-			| LocalUser
-			| WritePlayer
-			| RobloxScript
-			| RobloxEngine
-			| NotAccessible
-			| RunClientScript
-			| RunServerScript
-			| AccessOutsideWrite
-			| SpecialCapability
-			| AssetRequire
-			| LoadString
-			| ScriptGlobals
-			| CreateInstances
-			| Basic
-			| Audio
-			| DataStore
-			| Network
-			| Physics,
+			InternalTest = 1ULL << 60,
+			PluginOrOpenCloud = 1ULL << 61,
+			Assistant = 1ULL << 62,
+			Unknown = 1ULL << 63,
+
+			All = Plugin | LocalUser | WritePlayer | RobloxScript
+				| RobloxEngine | NotAccessible | RunClientScript
+				| RunServerScript | AccessOutsideWrite | Unassigned
+				| AssetRequire | LoadString | ScriptGlobals | CreateInstances
+				| Basic | Audio | DataStore | Network | Physics | UI
+				| CSG | Chat | Animation | Avatar | Input | Environment
+				| RemoteEvent | LegacySound | Players | CapabilityControl
+				| InternalTest | PluginOrOpenCloud | Assistant
 		};
 
-		void set(CapabilityType capability) { bitfield |= capability; }
-		void clear(CapabilityType capability) { bitfield &= ~capability; }
-		bool isSet(CapabilityType capability) const { return bitfield & capability; }
+		void set(CapabilityType capability) { bitfield |= (uint64_t)capability; }
+		void clear(CapabilityType capability) { bitfield &= ~(uint64_t)capability; }
+		bool isSet(CapabilityType capability) const { return bitfield & (uint64_t)capability; }
 
-		uint32_t bitfield;
+		uint64_t bitfield;
 	};
 
 
@@ -427,7 +446,7 @@ export
 		Connection* head;
 	};
 
-	struct __declspec(novtable) OnDemandInstance
+	struct OnDemandInstance
 	{
 		void* _1;
 		Signal* childAdded;
@@ -439,13 +458,14 @@ export
 		// 208 - Tags*?
 	};
 
-	struct __declspec(novtable) Instance
+	struct _OldInstance
 	{
 		/*  0*/ void* vftable;
 		/*  8*/ msvc_weak_ptr<Instance> self;
 		/* 24*/ ClassDescriptor* classDescriptor;
 		/* 32*/ int _1[2];
 		/* 40*/ bool isArchivable;
+		/* 48*/ OnDemandInstance* _8;
 		/* 56*/ int _2[4];
 		/* 60*/ int debugId;
 		/* 64*/ bool isParentLocked;
@@ -463,11 +483,41 @@ export
 		/* 112*/ int _6[2];
 		/* 128*/ int numExpectedChildren;
 		/* 132*/ int _7[3];
-		/* 144*/ OnDemandInstance* _8;
+	};
 
-		std::string getClassName()
-		{
-			return *classDescriptor->name;
+	struct Address
+	{
+		uintptr_t getAddress() const { return (uintptr_t)this; }
+		uintptr_t getAddress(int offset) const {
+			return (uintptr_t)this + offset;
+		}
+	};
+
+	struct Instance : Address
+	{
+		msvc_weak_ptr<Instance>& getSelf() {
+			return *reinterpret_cast<msvc_weak_ptr<Instance>*>(uintptr_t(this) + 0x8);
+		}
+
+		std::string getClassName() const {
+			return *getDescriptor()->name;
+		}
+
+		ClassDescriptor* getDescriptor() const {
+			return *(ClassDescriptor**)(getAddress(riblixOffsets.Instance.descriptor));
+		}
+
+		const char* getName() const {
+			return (const char*)(getAddress(riblixOffsets.Instance.name));
+		}
+
+		using children_t = msvc_shared_ptr<msvc_vector<msvc_shared_ptr<Instance>>>;
+		children_t& getChildren() const {
+			return *(children_t*)(getAddress(riblixOffsets.Instance.children));
+		}
+
+		Instance* getParent() const {
+			return *(Instance**)(getAddress(riblixOffsets.Instance.parent));
 		}
 	};
 
@@ -483,11 +533,20 @@ export
 		int identity;
 		int _6;
 		void* _7;
+
 		Instance* scriptContext;
 		Capabilities capabilities;
 		uint32_t _8;
 		Instance* script;
 		void* ref_count_script;
+
+		Instance* getScriptContext() {
+			return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.scriptContext));
+		}
+
+		//Instance* getScript() {
+		//	return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.script));
+		//}
 	};
 
 	struct Context
@@ -507,7 +566,10 @@ export
 		size_t _2;
 	};
 
-	struct DataModel
+	using DataModel = Instance;
+
+	// TODO: insanely unreliable
+	struct DataModel_
 	{
 		Instance* toInstance()
 		{

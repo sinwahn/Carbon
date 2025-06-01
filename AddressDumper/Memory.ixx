@@ -10,15 +10,108 @@ import <iostream>;
 
 import StringUtils;
 import ExceptionBase;
+<<<<<<< HEAD
+export import Address;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 typedef unsigned char BYTE;
 
 export 
 {
+
+<<<<<<< HEAD
+=======
+	struct Address
+	{
+		constexpr Address() = default;
+		constexpr Address(uintptr_t value) : value(value) {}
+
+		constexpr void set(uintptr_t v) { value = v; }
+		constexpr uintptr_t get() const { return value; }
+
+		constexpr auto operator<=>(const Address&) const = default;
+		constexpr auto operator<=>(uintptr_t other) const { return value <=> other; }
+
+		constexpr Address& operator=(const Address& other) { value = other.value; return *this; }
+		constexpr Address& operator+=(const Address& other) { value += other.value; return *this; }
+		constexpr Address& operator-=(const Address& other) { value -= other.value; return *this; }
+		constexpr Address operator+(auto v) { return Address(value + v); }
+		constexpr Address operator-(auto v) { return Address(value - v); }
+		constexpr void operator++() { value++; }
+		constexpr void operator--() { value--; }
+		constexpr void operator++(int) { value++; }
+		constexpr void operator--(int) { value--; }
+
+		constexpr operator uintptr_t() const { return value; }
+		template <typename T>
+		constexpr operator T* () const { return (T*)value; }
+
+		template <typename T = uintptr_t>
+		T* ptr() const { return (T*)value; }
+		
+		template <typename T = uintptr_t>
+		T& deref() const { return *ptr(); }
+
+		uintptr_t value = 0;
+	};
+
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
+	struct Offset : Address
+	{
+		constexpr Offset() = default;
+		constexpr Offset(const Address& other) { value = other.value; }
+		constexpr Offset(uintptr_t v) : Address(v) {}
+	};
+
+	struct _ContextualAddress : Address
+	{
+		constexpr _ContextualAddress() = default;
+		constexpr _ContextualAddress(uintptr_t v) : Address(v) {}
+	};
+<<<<<<< HEAD
+
+=======
+	
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
+	struct ExternalAddress : _ContextualAddress
+	{
+		constexpr ExternalAddress() = default;
+		explicit constexpr ExternalAddress(const Address& other) { value = other.value; }
+		explicit constexpr ExternalAddress(uintptr_t v) : _ContextualAddress(v) {}
+
+		constexpr Offset operator+(ExternalAddress v) { return Offset(value + v.value); }
+		constexpr Offset operator-(ExternalAddress v) { return Offset(value - v.value); }
+
+		constexpr ExternalAddress operator+(auto v) { return ExternalAddress(value + v); }
+		constexpr ExternalAddress operator-(auto v) { return ExternalAddress(value - v); }
+
+		constexpr ExternalAddress operator+(Offset v) { return ExternalAddress(value + v.value); }
+		constexpr ExternalAddress operator-(Offset v) { return ExternalAddress(value - v.value); }
+	};
+
+	struct LocalAddress : _ContextualAddress
+	{
+		constexpr LocalAddress() = default;
+		explicit constexpr LocalAddress(const Address& other) { value = other.value; }
+		explicit constexpr LocalAddress(uintptr_t v) : _ContextualAddress(v) {}
+
+		constexpr Offset operator+(LocalAddress v) { return Offset(value + v.value); }
+		constexpr Offset operator-(LocalAddress v) { return Offset(value - v.value); }
+
+		constexpr LocalAddress operator+(auto v) { return LocalAddress(value + v); }
+		constexpr LocalAddress operator-(auto v) { return LocalAddress(value - v); }
+
+		constexpr LocalAddress operator+(Offset v) { return LocalAddress(value + v.value); }
+		constexpr LocalAddress operator-(Offset v) { return LocalAddress(value - v.value); }
+
+		ExternalAddress getStoredPointer() const { return ExternalAddress(deref()); }
+	};
+
 	struct ByteArray
 	{
-		const BYTE* array;
-		size_t size;
+		const BYTE* array = nullptr;
+		size_t size = 0;
 	};
 
 	std::pair<int, size_t> getThreadCountAndChunkSize(ByteArray buffer)
@@ -47,11 +140,11 @@ export
 	}
 
 	void searchSequence(ByteArray sequence, const BYTE* bytes,
-		size_t start, size_t end,
-		size_t& resultIndex, std::mutex& mutex
+		Offset start, Offset end,
+		Offset& resultIndex, std::mutex& mutex
 	)
 	{
-		for (size_t i = start; i <= end; i++)
+		for (Offset i = start; i <= end; i++)
 		{
 			if (memcmp(bytes + i, sequence.array, sequence.size) == 0)
 			{
@@ -63,11 +156,11 @@ export
 	}
 
 	void searchSequences(ByteArray sequence, const BYTE* bytes,
-		size_t start, size_t end,
-		std::vector<size_t>& resultIndices, std::mutex& mutex
+		Offset start, Offset end,
+		std::vector<Offset>& resultIndices, std::mutex& mutex
 	)
 	{
-		for (size_t i = start; i <= end; i++)
+		for (Offset i = start; i <= end; i++)
 		{
 			if (memcmp(bytes + i, sequence.array, sequence.size) == 0)
 			{
@@ -77,7 +170,7 @@ export
 		}
 	}
 
-	std::vector<size_t> findSequences(ByteArray buffer, ByteArray sequence)
+	std::vector<Offset> findSequences(ByteArray buffer, ByteArray sequence)
 	{
 		auto [nThreads, chunkSize] = getThreadCountAndChunkSize(buffer);
 
@@ -85,16 +178,16 @@ export
 		threads.reserve(nThreads);
 		std::mutex mutex;
 
-		std::vector<size_t> resultIndices;
+		std::vector<Offset> result;
 
 		for (size_t i = 0; i < nThreads; i++)
 		{
-			size_t start = i * chunkSize;
-			size_t end = (i == nThreads - 1) ? buffer.size - 1 : start + chunkSize - 1;
+			Offset start = Offset(i * chunkSize);
+			Offset end = Offset((i == nThreads - 1) ? buffer.size - 1 : start.get() + chunkSize - 1);
 			threads.push_back(
 				std::thread(
 					searchSequences, sequence, buffer.array,
-					start, end, std::ref(resultIndices), std::ref(mutex)
+					start, end, std::ref(result), std::ref(mutex)
 				)
 			);
 		}
@@ -102,10 +195,10 @@ export
 		for (auto& thread : threads)
 			thread.join();
 
-		return resultIndices;
+		return result;
 	}
 
-	size_t findSequence(ByteArray buffer, ByteArray sequence)
+	Offset findSequence(ByteArray buffer, ByteArray sequence)
 	{
 		auto [nThreads, chunkSize] = getThreadCountAndChunkSize(buffer);
 
@@ -113,16 +206,16 @@ export
 		threads.reserve(nThreads);
 		std::mutex mutex;
 
-		size_t resultIndex = 0;
+		Offset result;
 
 		for (size_t i = 0; i < nThreads; i++)
 		{
-			size_t start = i * chunkSize;
-			size_t end = (i == nThreads - 1) ? buffer.size - 1 : start + chunkSize - 1;
+			Offset start = Offset(i * chunkSize);
+			Offset end = Offset((i == nThreads - 1) ? buffer.size - 1 : start.get() + chunkSize - 1);
 			threads.push_back(
 				std::thread(searchSequence, sequence, buffer.array,
 					start, end,
-					std::ref(resultIndex), std::ref(mutex)
+					std::ref(result), std::ref(mutex)
 				)
 			);
 		}
@@ -130,7 +223,7 @@ export
 		for (auto& thread : threads)
 			thread.join();
 
-		return resultIndex;
+		return result;
 	}
 
 	void printMemoryRange(const BYTE* startAddress, int numBytes)
@@ -140,7 +233,7 @@ export
 		std::cout << std::endl;
 	}
 
-	void skipZeros(const BYTE* data, size_t& offset)
+	void skipZeros(const BYTE* data, Offset& offset)
 	{
 		while (!*(data + offset))
 			offset++;

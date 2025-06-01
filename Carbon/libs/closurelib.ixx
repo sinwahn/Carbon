@@ -298,6 +298,11 @@ public:
 
 			auto closureCopy = copyLuaClosure(L, target);
 
+			// keep hook from gcing
+			lua_pushlightuserdatatagged(L, hook);
+			lua_pushclosure(L, hook);
+			lua_rawset(L, LUA_REGISTRYINDEX);
+
 			lua_pushlightuserdatatagged(L, closureCopy);
 			lua_pushclosure(L, closureCopy);
 			lua_rawset(L, LUA_REGISTRYINDEX);

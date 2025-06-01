@@ -213,6 +213,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\Address.ixx" />
     <ClCompile Include="..\Common\ExceptionBase.ixx" />
     <ClCompile Include="..\Common\Formatter.ixx" />
     <ClCompile Include="..\Common\StringUtils.ixx" />

@@ -18,6 +18,11 @@
     <ClCompile Include="Injector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
     <ClCompile Include="..\Common\Pipes.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,5 +47,15 @@
     <ClCompile Include="DumpValidator.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
+    <ClCompile Include="..\Common\RiblixStructureOffsets.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\RttiDescriptorContainer.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> f0ff9a0 (- Automatic structure offset analyzer)
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
   </ItemGroup>
 </Project>

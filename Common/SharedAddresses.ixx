@@ -5,6 +5,7 @@ import <string>;
 
 import LuauTypes;
 import RiblixStructures;
+import RiblixStructureOffsets;
 import Pipes;
 
 export
@@ -73,6 +74,7 @@ export
 	{
 		LuaApiAddresses luaApiAddresses;
 		RiblixAddresses riblixAddresses;
+		RiblixOffsets riblixOffsets;
 	};
 
 	struct SharedMemoryContentDeserialized;

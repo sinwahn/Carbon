@@ -21,14 +21,13 @@ void DataModelInfo::setDataModel(DataModelType _type)
 
 DataModelType getDataModelType(const DataModel* dataModel)
 {
-	auto asInstance = dataModel->toInstance();
-	if (asInstance->children->empty())
+	if (dataModel->getChildren().get()->empty())
 		return DataModelType::Invalid;
 
 	std::string name;
 	name.reserve(100);
 
-	for (auto& child : *asInstance->children)
+	for (auto& child : *dataModel->getChildren().get())
 	{
 		name = child->getClassName();
 		if (name == "NetworkServer")

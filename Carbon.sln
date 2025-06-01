@@ -17,12 +17,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zydis", "zydis\msvc\zydis\Z
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{78F450CD-C790-4C80-8667-FBF3E05DEABC}"
 	ProjectSection(SolutionItems) = preProject
+		Common\Address.ixx = Common\Address.ixx
 		Common\CarbonWindows.h = Common\CarbonWindows.h
 		Common\ExceptionBase.ixx = Common\ExceptionBase.ixx
 		Common\Formatter.ixx = Common\Formatter.ixx
 		Common\LuauTypes.ixx = Common\LuauTypes.ixx
 		Common\Pipes.ixx = Common\Pipes.ixx
+		Common\RiblixStructureOffsets.ixx = Common\RiblixStructureOffsets.ixx
 		Common\RiblixStructures.ixx = Common\RiblixStructures.ixx
+		Common\RttiDescriptorContainer.ixx = Common\RttiDescriptorContainer.ixx
 		Common\SharedAddresses.ixx = Common\SharedAddresses.ixx
 		Common\StringUtils.ixx = Common\StringUtils.ixx
 	EndProjectSection
@@ -70,9 +73,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-		RelWithDebInfo|Any CPU = RelWithDebInfo|Any CPU
-		RelWithDebInfo|x64 = RelWithDebInfo|x64
-		RelWithDebInfo|x86 = RelWithDebInfo|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.Debug Kernel|Any CPU.ActiveCfg = Debug|x64
@@ -135,12 +135,6 @@ Global
 		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.Release|x64.Build.0 = Release|x64
 		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.Release|x86.ActiveCfg = Release|Win32
 		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.Release|x86.Build.0 = Release|Win32
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|Any CPU.ActiveCfg = Release|x64
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|Any CPU.Build.0 = Release|x64
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|x64.ActiveCfg = Release|x64
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|x64.Build.0 = Release|x64
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
-		{D0360A50-A8EA-4876-A60F-CC7F21C6017D}.RelWithDebInfo|x86.Build.0 = Release|Win32
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Debug Kernel|Any CPU.ActiveCfg = Debug|x64
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Debug Kernel|Any CPU.Build.0 = Debug|x64
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Debug Kernel|x64.ActiveCfg = Debug|x64
@@ -201,12 +195,6 @@ Global
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Release|x64.Build.0 = Release|x64
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Release|x86.ActiveCfg = Release|Win32
 		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.Release|x86.Build.0 = Release|Win32
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|Any CPU.ActiveCfg = Release|x64
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|Any CPU.Build.0 = Release|x64
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|x64.ActiveCfg = Release|x64
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|x64.Build.0 = Release|x64
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
-		{AB94E855-39E7-41E9-9DC1-26019E63ADC5}.RelWithDebInfo|x86.Build.0 = Release|Win32
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Debug Kernel|Any CPU.ActiveCfg = Debug Kernel|x64
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Debug Kernel|Any CPU.Build.0 = Debug Kernel|x64
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Debug Kernel|x64.ActiveCfg = Debug Kernel|x64
@@ -267,12 +255,6 @@ Global
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Release|x64.Build.0 = Release MT|x64
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Release|x86.ActiveCfg = Release MT DLL|Win32
 		{88A23124-5640-35A0-B890-311D7A67A7D2}.Release|x86.Build.0 = Release MT DLL|Win32
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|Any CPU.ActiveCfg = Release MT DLL|x64
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|Any CPU.Build.0 = Release MT DLL|x64
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|x64.ActiveCfg = Release MT DLL|x64
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|x64.Build.0 = Release MT DLL|x64
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|x86.ActiveCfg = Release MT DLL|Win32
-		{88A23124-5640-35A0-B890-311D7A67A7D2}.RelWithDebInfo|x86.Build.0 = Release MT DLL|Win32
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Debug Kernel|Any CPU.ActiveCfg = Debug|x64
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Debug Kernel|Any CPU.Build.0 = Debug|x64
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Debug Kernel|x64.ActiveCfg = Debug|x64
@@ -333,12 +315,6 @@ Global
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Release|x64.Build.0 = Release|x64
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Release|x86.ActiveCfg = Release|Win32
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.Release|x86.Build.0 = Release|Win32
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|Any CPU.ActiveCfg = Release|x64
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|Any CPU.Build.0 = Release|x64
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|x64.ActiveCfg = Release|x64
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|x64.Build.0 = Release|x64
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
-		{AD8FF974-80B3-448B-83F1-91E8E402DF5C}.RelWithDebInfo|x86.Build.0 = Release|Win32
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Debug Kernel|Any CPU.ActiveCfg = Debug|Any CPU
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Debug Kernel|Any CPU.Build.0 = Debug|Any CPU
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Debug Kernel|x64.ActiveCfg = Debug|Any CPU
@@ -399,12 +375,6 @@ Global
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Release|x64.Build.0 = Release|Any CPU
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Release|x86.ActiveCfg = Release|Any CPU
 		{C043F59A-6330-4B94-8010-C9CECADBD35E}.Release|x86.Build.0 = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
-		{C043F59A-6330-4B94-8010-C9CECADBD35E}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
