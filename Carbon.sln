@@ -17,15 +17,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zydis", "zydis\msvc\zydis\Z
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{78F450CD-C790-4C80-8667-FBF3E05DEABC}"
 	ProjectSection(SolutionItems) = preProject
+<<<<<<< HEAD
 		Common\Address.ixx = Common\Address.ixx
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		Common\CarbonWindows.h = Common\CarbonWindows.h
 		Common\ExceptionBase.ixx = Common\ExceptionBase.ixx
 		Common\Formatter.ixx = Common\Formatter.ixx
 		Common\LuauTypes.ixx = Common\LuauTypes.ixx
 		Common\Pipes.ixx = Common\Pipes.ixx
+<<<<<<< HEAD
 		Common\RiblixStructureOffsets.ixx = Common\RiblixStructureOffsets.ixx
 		Common\RiblixStructures.ixx = Common\RiblixStructures.ixx
 		Common\RttiDescriptorContainer.ixx = Common\RttiDescriptorContainer.ixx
+=======
+		Common\RiblixStructures.ixx = Common\RiblixStructures.ixx
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		Common\SharedAddresses.ixx = Common\SharedAddresses.ixx
 		Common\StringUtils.ixx = Common\StringUtils.ixx
 	EndProjectSection

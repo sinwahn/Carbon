@@ -261,11 +261,20 @@ export
 		int freeNext;   // next free block offset in this page, in bytes; when negative, freeList is used instead
 		int busyBlocks; // number of blocks allocated out of this page
 
+<<<<<<< HEAD
 		// provide additional padding based on current object size to provide 16 byte alignment of data
 		// later static_assert checks that this requirement is held
 		char padding[sizeof(void*) == 8 ? 8 : 12];
 
 		char data[1];
+=======
+		union
+		{
+			char data[1];
+			double align1;
+			void* align2;
+		};
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	};
 
 	struct global_State
@@ -288,6 +297,7 @@ export
 		int gcstepmul;                            // see LUAI_GCSTEPMUL
 		int gcstepsize;                          // see LUAI_GCSTEPSIZE
 
+<<<<<<< HEAD
 		struct lua_Page* freepages[LUA_SIZECLASSES]; // free page linked list for each size class for non-collectable objects
 		struct lua_Page* freegcopages[LUA_SIZECLASSES]; // free page linked list for each size class for collectable objects
 		struct lua_Page* allpages; // page linked list with all pages for all non-collectable object classes (available with LUAU_ASSERTENABLED)
@@ -300,6 +310,19 @@ export
 		struct lua_State* mainthread;
 		UpVal uvhead;                                    // head of double-linked list of all open upvalues
 		struct LuaTable* mt[LUA_T_COUNT];                   // metatables for basic types
+=======
+		lua_Page* freepages[LUA_SIZECLASSES]; // free page linked list for each size class for non-collectable objects
+		lua_Page* freegcopages[LUA_SIZECLASSES]; // free page linked list for each size class for collectable objects
+		lua_Page* allpages; // page linked list with all pages for all non-collectable object classes (available with LUAU_ASSERTENABLED)
+		lua_Page* allgcopages; // page linked list with all pages for all classes
+		lua_Page* sweepgcopage; // position of the sweep in `allgcopages'
+
+		size_t memcatbytes[LUA_MEMORY_CATEGORIES]; // total amount of memory used by each memory category
+
+		struct lua_State* mainthread;
+		UpVal uvhead;                                    // head of double-linked list of all open upvalues
+		struct Table* mt[LUA_T_COUNT];                   // metatables for basic types
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		TString* ttname[LUA_T_COUNT];       // names for basic types
 		TString* tmname[TM_N];             // array with tag-method names
 
@@ -314,11 +337,17 @@ export
 		uint64_t ptrenckey[4]; // pointer encoding key for display
 
 		lua_Callbacks cb;
+<<<<<<< HEAD
 
 		lua_ExecutionCallbacks ecb;
 
 		void (*udatagc[LUA_UTAG_LIMIT])(lua_State*, void*); // for each userdata tag, a gc callback to be called immediately before freeing memory
 		LuaTable* udatamt[LUA_UTAG_LIMIT]; // metatables for tagged userdata
+=======
+		lua_ExecutionCallbacks ecb;
+
+		void (*udatagc[LUA_UTAG_LIMIT])(lua_State*, void*); // for each userdata tag, a gc callback to be called immediately before freeing memory
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 		TString* lightuserdataname[LUA_LUTAG_LIMIT]; // names for tagged lightuserdata
 
@@ -331,6 +360,10 @@ export
 		bool isdead(GCObject* o);
 		uint8_t otherwhite() { return currentwhite ^ WHITEBITS; }
 	};
+<<<<<<< HEAD
+=======
+	// clang-format on
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 	using StkId = TValue*; // index to stack elements
 	using Instruction = uint32_t;
@@ -378,9 +411,15 @@ export
 
 		int cachedslot;    // when table operations or INDEX/NEWINDEX is invoked from Luau, what is the expected slot for lookup?
 
+<<<<<<< HEAD
 		struct Table* gt;           // table of globals
 		struct UpVal* openupval;    // list of open upvalues in this stack
 		struct yyGCObject* gclist;
+=======
+		Table* gt;           // table of globals
+		UpVal* openupval;    // list of open upvalues in this stack
+		GCObject* gclist;
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 		TString* namecall; // when invoked from Luau using NAMECALL, what method do we need to invoke?
 

@@ -1,0 +1,277 @@
+﻿<Window x:Class="CarbonGui.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:CarbonGui="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+		Title="Carbon"
+		Height="450" Width="800"
+		MinHeight="250" MinWidth="550"
+		
+		Background="#FF1E1E1E"
+		BorderBrush="#FF3C3C3C"
+		BorderThickness="2"
+		
+		AllowsTransparency="True"
+		WindowStyle="None"
+		>
+
+	<WindowChrome.WindowChrome>
+		<WindowChrome 
+		CaptionHeight="0"
+		ResizeBorderThickness="8" />
+	</WindowChrome.WindowChrome>
+
+	<Window.Resources>
+
+		<Style x:Key="HiddenBackground" TargetType="Panel">
+			<Setter Property="Background" Value="#FF1E1E1E"/>
+		</Style>
+		
+		<Style x:Key="ElementColorControl" TargetType="Control">
+			<Setter Property="Background" Value="#FF1E1E1E"/>
+			<Setter Property="Foreground" Value="#FFD3D3D3"/>
+
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Padding" Value="10,0"/>
+		</Style>
+
+		<Style x:Key="ElementColorBorder" TargetType="Border">
+			<Setter Property="Background" Value="#FF2D2D2D"/>
+			<Setter Property="BorderBrush" Value="#FFD3D3D3"/>
+			<Setter Property="BorderThickness" Value="1"/>
+		</Style>
+
+		<Style x:Key="HoverBottomButton" BasedOn="{StaticResource ElementColorControl}" TargetType="ButtonBase">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="Button">
+						<Border Name="border" 
+								Background="{TemplateBinding Background}"
+								BorderBrush="{TemplateBinding BorderBrush}"
+								BorderThickness="{TemplateBinding BorderThickness}"
+								Padding="{TemplateBinding Padding}"
+								>
+							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<!-- hover -->
+							<Trigger Property="IsMouseOver" Value="True">
+								<Setter TargetName="border" Property="Background" Value="#FF3C3C3C"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FFAFAFAF"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+							<!-- pressed -->
+							<Trigger Property="IsPressed" Value="True">
+								<Setter TargetName="border" Property="Background" Value="#FF2D2D2D"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FFD3D3D3"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+							<!-- disabled -->
+							<Trigger Property="IsEnabled" Value="False">
+								<Setter TargetName="border" Property="Background" Value="#FF1E1E1E"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FF2D2D2D"/>
+								<Setter Property="Foreground" Value="#FF646464"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style x:Key="HoverDropdownButtonStyle" BasedOn="{StaticResource ElementColorControl}" TargetType="ToggleButton">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="ToggleButton">
+						<Border Name="border" 
+								Background="{TemplateBinding Background}"
+								BorderBrush="{TemplateBinding BorderBrush}"
+								BorderThickness="{TemplateBinding BorderThickness}"
+								Padding="{TemplateBinding Padding}"
+								>
+							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<!-- hover -->
+							<Trigger Property="IsMouseOver" Value="True">
+								<Setter TargetName="border" Property="Background" Value="#FF3C3C3C"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FFAFAFAF"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+							<!-- pressed -->
+							<Trigger Property="IsPressed" Value="True">
+								<Setter TargetName="border" Property="Background" Value="#FF2D2D2D"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FFD3D3D3"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+							<!-- disabled -->
+							<Trigger Property="IsEnabled" Value="False">
+								<Setter TargetName="border" Property="Background" Value="#FF1E1E1E"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FF2D2D2D"/>
+								<Setter Property="Foreground" Value="#FF646464"/>
+							</Trigger>
+							<!-- checked -->
+							<Trigger Property="IsChecked" Value="True">
+								<Setter TargetName="border" Property="Background" Value="#FF2D2D2D"/>
+								<Setter TargetName="border" Property="BorderBrush" Value="#FFD3D3D3"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style x:Key="BottomButton" BasedOn="{StaticResource HoverBottomButton}" TargetType="ButtonBase">
+			<Setter Property="Margin" Value="5"/>
+		</Style>
+
+		<Style x:Key="FirstBottomButton" BasedOn="{StaticResource HoverBottomButton}" TargetType="ButtonBase">
+			<Setter Property="Margin" Value="0,5,5,5"/>
+		</Style>
+
+		<Style x:Key="BottomDropdownButton" BasedOn="{StaticResource HoverDropdownButtonStyle}" TargetType="ToggleButton">
+			<Setter Property="Margin" Value="5"/>
+		</Style>
+
+		<Style x:Key="ExpanderToggleButton" BasedOn="{StaticResource ElementColorControl}" TargetType="ToggleButton">
+			<Setter Property="Padding" Value="5"/>
+			<Setter Property="MaxHeight" Value="20"/>
+			
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="ToggleButton">
+						<Border Background="Transparent" Padding="0">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock x:Name="ExpanderIcon"
+										   Text="⏵"
+										   VerticalAlignment="Center"
+										   HorizontalAlignment="Center"
+										   Margin="3,0,0,0"
+										   FontSize="16"
+										   RenderTransformOrigin="0.5,0.5"
+										   >
+									<TextBlock.RenderTransform>
+										<RotateTransform Angle="0"/>
+									</TextBlock.RenderTransform>
+								</TextBlock>
+								<ContentPresenter Grid.Column="1" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsChecked" Value="True">
+								<Setter TargetName="ExpanderIcon" Property="RenderTransform">
+									<Setter.Value>
+										<RotateTransform Angle="90"/>
+									</Setter.Value>
+								</Setter>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style x:Key="Expander" BasedOn="{StaticResource ElementColorControl}" TargetType="Expander">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="Expander">
+						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+							<DockPanel>
+								<ToggleButton x:Name="ExpanderToggleButton" Style="{StaticResource ExpanderToggleButton}"
+											  DockPanel.Dock="Top"
+											  Focusable="False"
+											  IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}">
+									<ContentPresenter ContentSource="Header"/>
+								</ToggleButton>
+								<ContentPresenter x:Name="ExpandSite"
+												  Visibility="Collapsed"
+												  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+												  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+												  DockPanel.Dock="Bottom"/>
+							</DockPanel>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsExpanded" Value="True">
+								<Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+	</Window.Resources>
+	
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="600*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="Auto"/>
+		</Grid.ColumnDefinitions>
+
+		<!-- topbar -->
+		<Grid Grid.Row="0" Grid.ColumnSpan="3" Height="30" Style="{StaticResource HiddenBackground}" MouseLeftButtonDown="OnTopBarMouseLeftButtonDown">
+			<TextBlock Text="Carbon" VerticalAlignment="Center" Margin="10,0" Foreground="White"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<TextBlock Name="ProcessLabel" Text="Process" VerticalAlignment="Center" Margin="5,0" Foreground="White"/>
+				<TextBlock Name="LuaStateLabel" Text="State" VerticalAlignment="Center" Margin="5,0" Foreground="White"/>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+				<Button Style="{StaticResource HoverBottomButton}" Name="MinimizeButton" Content="_" Width="30" BorderThickness="0" Click="OnMinimizeButtonClicked"/>
+				<Button Style="{StaticResource HoverBottomButton}" Name="MaximizeButton" Content="[]" Width="30" BorderThickness="0" Click="OnMaximizeButtonClicked"/>
+				<Button Style="{StaticResource HoverBottomButton}" Name="CloseButton" Content="X" Width="30" BorderThickness="0" Click="OnCloseButtonClicked"/>
+			</StackPanel>
+		</Grid>
+
+		<!-- code editor -->
+		<CarbonGui:WebView2 Name="CodeEditor" Grid.Row="1" Grid.Column="0" Margin="10,10,10,48"/>
+
+		<!-- script list -->
+		<ListBox x:Name="ScriptFilesListBox" Grid.Row="1" Grid.Column="2" Margin="5,10,10,48" Background="#1E1E1E" Foreground="White" BorderBrush="#444444" BorderThickness="1"/>
+
+		<!-- bottom buttons left -->
+		<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="Transparent" Width="638" Height="47" Margin="10,0,0,0">
+			<Button Style="{StaticResource FirstBottomButton}" Name="ExecuteButton" Content="Execute" Click="OnExecuteButtonClicked"/>
+			<Button Style="{StaticResource BottomButton}" Name="ClearButton" Content="Clear" Click="OnClearButtonClicked"/>
+			<Button Style="{StaticResource BottomButton}" Name="OpenFileButton" Content="Open File" Click="OnOpenFileButtonClicked"/>
+			<Button Style="{StaticResource BottomButton}" Name="SaveFileButton" Content="Save File" Click="OnSaveFileButtonClicked"/>
+			<Button Style="{StaticResource BottomButton}" Name="ExecuteFileButton" Content="Execute File" Click="OnExecuteFileButtonClicked"/>
+
+			<ToggleButton x:Name="LuaStatesButton" Style="{StaticResource BottomDropdownButton}" Content="LuaStates" Click="OnLuaStateButtonClicked"/>
+			<Popup x:Name="LuaStatesPopup" PlacementTarget="{Binding ElementName=LuaStatesButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" IsOpen="{Binding IsChecked, ElementName=LuaStatesButton}">
+				<Border Style="{StaticResource ElementColorBorder}">
+					<ScrollViewer VerticalScrollBarVisibility="Disabled">
+						<StackPanel x:Name="LuaStatesPopupStackPanel" Margin="0">
+							<!-- groups will be added here dynamically -->
+						</StackPanel>
+					</ScrollViewer>
+				</Border>
+			</Popup>
+
+			<ToggleButton x:Name="ProcessesButton" Style="{StaticResource BottomDropdownButton}" Content="Processes"/>
+			<Popup x:Name="ProcessesPopup" PlacementTarget="{Binding ElementName=ProcessesButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" IsOpen="{Binding IsChecked, ElementName=ProcessesButton}">
+				<Border Style="{StaticResource ElementColorBorder}">
+					<ScrollViewer VerticalScrollBarVisibility="Disabled">
+						<StackPanel x:Name="ProcessesPopupStackPanel" Margin="0">
+							<!-- groups will be added here dynamically -->
+						</StackPanel>
+					</ScrollViewer>
+				</Border>
+			</Popup>
+		</StackPanel>
+
+		<!-- bottom buttons right -->
+		<StackPanel Grid.Row="1" Grid.ColumnSpan="1" Orientation="Horizontal" Background="Transparent" Grid.Column="2" Margin="0,0,10,0" Height="48" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="141" FlowDirection="RightToLeft" UseLayoutRounding="False">
+			<Button Style="{StaticResource FirstBottomButton}" Name="AttachButton" Content="Attach" HorizontalAlignment="Right" Click="OnAttachButtonClicked"/>
+			<Button Style="{StaticResource BottomButton}" Name="SettingsButton" Content="Settings" Click="OnSettingsButtonClicked"/>
+		</StackPanel>
+	</Grid>
+</Window>

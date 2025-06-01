@@ -1,180 +1,159 @@
-#include "../Common/Exception.h"
-#include "../Common/Windows.h"
-#include "../Common/Pipes.h"
+#include "../Common/CarbonWindows.h"
 
 import <iostream>;
 import <string>;
 import <filesystem>;
 
-class Circus
+import Pipes;
+import SharedAddresses;
+import ExceptionBase;
+import DumpValidator;
+
+bool terminateCrashHandler(DWORD parentProcessId)
 {
-public:
-	DWORD getProcessId()
-	{
-		auto processId = ::getProcessId(L"RobloxStudioBeta.exe");
-		if (!processId)
-			raise("process not found");
-		return processId;
-	}
+	auto id = ::getProcessIdWithParent(L"RobloxCrashHandler.exe", parentProcessId);
+	if (!id)
+		return false;
 
-	void checkDll()
-	{
-		if (!std::filesystem::exists(dllPath))
-			raise("missing dll at path", std::filesystem::absolute(dllPath));
-	}
+	HandleScope process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+	if (process == INVALID_HANDLE_VALUE)
+		raise("failed to terminate crash handler");
 
-	void checkDump()
-	{
-		if (!std::filesystem::exists(dumpPath))
-		{
-			std::cout << "missing dump file, creating new one\n";
+	TerminateProcess(process, 0);
+	return true;
+}
 
-			if (!std::filesystem::exists(dumperPath))
-				raise("missing dumper at path", std::filesystem::absolute(dumperPath));
-
-			std::string command = dumperPath.string() + " " + dumpPath.string();
-
-			if (std::system(command.c_str()))
-				raise("AddressDumper is dead XD");
-		}
-	}
-
-	void checkUserDirectory()
-	{
-		if (!std::filesystem::exists(userDirectoryPath))
-			std::filesystem::create_directory(userDirectoryPath);
-	}
-
-	std::filesystem::path getDllPath() const { return dllPath; }
-	std::filesystem::path getDumpPath() const { return dumpPath; }
-	std::filesystem::path getUserDirectoryPath() const { return userDirectoryPath; }
-	std::filesystem::path getSettingsPath() const { return settingsPath; }
-	std::filesystem::path getDumperPath() const { return dumperPath; }
-
-	bool terminateCrashHandler()
-	{
-		auto id = ::getProcessId(L"RobloxCrashHandler.exe");
-		if (!id)
-			return false;
-
-		HandleScope process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
-		if (process == INVALID_HANDLE_VALUE)
-			raise("failed to terminate crash handler");
-
-		TerminateProcess(process, 0);
-		return true;
-	}
-
-private:
-	const std::filesystem::path userDirectoryPath = "workspace";
-	const std::filesystem::path dumpPath = "dumpresult.txt";
-	const std::filesystem::path dllPath = "Coal.dll";
-	const std::filesystem::path dumperPath = "AddressDumper.exe";
-	const std::filesystem::path settingsPath = "Settings.cfg";
-};
-
-Circus circus;
-
-class Injector
+bool inject(const std::filesystem::path& dllPath, HandleScope& process)
 {
-public:
+	auto absoluteDllPath = std::filesystem::absolute(dllPath);
+	auto absoluteDllPathString = absoluteDllPath.string();
 
-	bool inject(const std::filesystem::path& dllPath, DWORD processId)
+	auto remoteMemory = VirtualAllocEx(
+		process,
+		NULL,
+		absoluteDllPathString.size(),
+		MEM_COMMIT | MEM_RESERVE,
+		PAGE_READWRITE
+	);
+
+	if (!remoteMemory)
+		raise("failed to allocate memory");
+
+	std::cout << "allocation address: " << remoteMemory << std::endl;
+
+	BOOL writeResult = WriteProcessMemory(
+		process,
+		remoteMemory,
+		(LPVOID)absoluteDllPathString.c_str(),
+		absoluteDllPathString.size(),
+		NULL
+	);
+
+	if (!writeResult)
+		raise("failed to write process memory");
+
+	HandleScope remoteThread = CreateRemoteThread(
+		process,
+		NULL,
+		0,
+		(LPTHREAD_START_ROUTINE)LoadLibraryA,
+		remoteMemory,
+		0,
+		NULL
+	);
+
+	if (!remoteThread)
+		raise("failed to create remote thread");
+
+	WaitForSingleObject(remoteThread, INFINITE);
+	VirtualFreeEx(process, remoteMemory, 0, MEM_RELEASE);
+
+	return true;
+}
+
+#define API __declspec(dllexport)
+
+extern "C" API const char* Inject(DWORD processId, size_t dataSize, const char* paths);
+
+static HandleScope sharedMemoryMapFile;
+
+void createOffsetsSharedMemory(const std::wstring& settingsPath,
+	const std::wstring& userDirectoryPath, const std::wstring& logPath)
+{
+	SharedMemoryContentDeserialized sharedData;
+	sharedData.offsets.luaApiAddresses = luaApiAddresses;
+	sharedData.offsets.riblixAddresses = riblixAddresses;
+	sharedData.settingsPath = settingsPath;
+	sharedData.userDirectoryPath = userDirectoryPath;
+	sharedData.logPath = logPath;
+
+	sharedMemoryMapFile.assign(CreateFileMappingW(
+		INVALID_HANDLE_VALUE,
+		0,
+		PAGE_READWRITE,
+		0,
+		sizeof(SharedMemoryOffsets),
+		sharedMemoryName
+	));
+
+	if (!sharedMemoryMapFile)
+		raise("failed to create shared memory", formatLastError());
+
+	auto sharedMemory = (char*)MapViewOfFile(
+		sharedMemoryMapFile,
+		FILE_MAP_ALL_ACCESS,
+		0,
+		0,
+		sharedMemorySize
+	);
+
+	if (!sharedMemory)
+		raise("failed to map view shared memory", formatLastError());
+
+	auto serialized = sharedData.serialize();
+	memcpy(sharedMemory, serialized.c_str(), serialized.size());
+}
+
+const char* Inject(DWORD processId, size_t dataSize, const char* paths)
+{
+	try
 	{
-		auto absoluteDllPath = std::filesystem::absolute(dllPath);
-		auto absoluteDllPathString = absoluteDllPath.string();
+		terminateCrashHandler(processId);
+
+		ReadBuffer reader(std::string(paths, dataSize));
+		
+		// keep in sync with TryInject()
+		auto readwstring = [&]() {
+			auto size = reader.readU64();
+			auto string = reader.readArray<wchar_t>(size);
+			return std::wstring(string, size);
+		};
+
+		auto dllPath = readwstring();
+		auto settingsPath = readwstring();
+		auto dumpPath = readwstring();
+		auto dumperPath = readwstring();
+		auto userDirectoryPath = readwstring();
+		auto logPath = readwstring();
 
 		HandleScope process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 		if (process == INVALID_HANDLE_VALUE)
 			raise("failed to open process");
 
-		auto remoteMemory = VirtualAllocEx(
-			process,
-			NULL,
-			absoluteDllPathString.size(),
-			MEM_COMMIT | MEM_RESERVE,
-			PAGE_READWRITE
-		);
+		DumpValidator dumpValidator(process, getFirstModule(processId, L"RobloxStudioBeta.exe").modBaseAddr);
+		dumpValidator.initAddressesFromFile(dumpPath, dumperPath);
 
-		if (!remoteMemory)
-			raise("failed to allocate memory");
+		createOffsetsSharedMemory(settingsPath, userDirectoryPath, logPath);
 
-		std::cout << "allocation address: " << remoteMemory << std::endl;
+		if (!inject(dllPath, process))
+			raise("failed to inject");
 
-		BOOL writeResult = WriteProcessMemory(
-			process,
-			remoteMemory,
-			(LPVOID)absoluteDllPathString.c_str(),
-			absoluteDllPathString.size(),
-			NULL
-		);
-
-		if (!writeResult)
-			raise("failed to write process memory");
-
-		HandleScope remoteThread = CreateRemoteThread(
-			process,
-			NULL,
-			0,
-			(LPTHREAD_START_ROUTINE)LoadLibraryA,
-			remoteMemory,
-			0,
-			NULL
-		);
-
-		if (!remoteThread)
-			raise("failed to create remote thread");
-
-		WaitForSingleObject(remoteThread, INFINITE);
-		VirtualFreeEx(process, remoteMemory, 0, MEM_RELEASE);
-
-		return true;
-	}
-};
-
-int main()
-{
-	try
-	{
-		circus.terminateCrashHandler();
-
-		circus.checkUserDirectory();
-		auto process = circus.getProcessId();
-		circus.checkDll();
-		circus.checkDump();
-
-		NamedPipeServer server;
-		Injector injector;
-
-		if (injector.inject(circus.getDllPath(), process))
-		{
-			if (!server.create())
-				raise("failed to create server pipe");
-
-			if (!server.waitForClient())
-				raise("client wait timeout");
-
-			auto writer = server.makeWriteBuffer();
-
-			auto writePath = [&](std::filesystem::path path)
-			{
-				auto absolute = std::filesystem::absolute(path);
-				writer.writeU64(absolute.native().size());
-				writer.writeArray(absolute.native().c_str(), absolute.native().size());
-			};
-
-			writePath(circus.getSettingsPath());
-			writePath(circus.getDumpPath());
-			writePath(circus.getDumperPath());
-			writePath(circus.getUserDirectoryPath());
-
-			writer.send();
-		}
+		return nullptr;
 	}
 	catch (const std::exception& exception)
 	{
-		std::cout << exception.what() << std::endl;
+		static std::string errorMessage;
+		errorMessage.assign(exception.what());
+		return errorMessage.c_str();
 	}
-
-	return 0;
 }

@@ -171,12 +171,15 @@
     <ClCompile Include="..\Common\ExceptionBase.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="..\Common\RiblixStructureOffsets.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\RttiDescriptorContainer.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MinHook\trampoline.h">

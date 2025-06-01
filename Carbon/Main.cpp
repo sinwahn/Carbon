@@ -90,7 +90,10 @@ int lua_getfield_Hook(lua_State* L, int idx, const char* k)
 	if (!mainThreadCreated)
 	{
 		mainThreadCreated = true;
+<<<<<<< HEAD
 		riblixOffsets.initialize(L);
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		std::thread customThread(realMain);
 		customThread.detach();
 	}
@@ -206,7 +209,11 @@ LONG panic(_EXCEPTION_POINTERS* ep)
 	result += getStackTrace(ep->ContextRecord);
 	Console::getInstance() << result << std::endl;
 
+<<<<<<< HEAD
 	Sleep(-1);
+=======
+	Sleep(600'000);
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	abort();
 	return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -232,7 +239,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 				logger.initialize(sharedMemoryContent.logPath);
 				luaApiAddresses = sharedMemoryContent.offsets.luaApiAddresses;
 				riblixAddresses = sharedMemoryContent.offsets.riblixAddresses;
+<<<<<<< HEAD
 				riblixOffsets = sharedMemoryContent.offsets.riblixOffsets;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 				hookHandler.getHook(HookId::lua_getfield)
 					.setTarget(luaApiAddresses.lua_getfield)

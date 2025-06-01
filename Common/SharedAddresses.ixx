@@ -5,7 +5,10 @@ import <string>;
 
 import LuauTypes;
 import RiblixStructures;
+<<<<<<< HEAD
 import RiblixStructureOffsets;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 import Pipes;
 
 export
@@ -74,7 +77,10 @@ export
 	{
 		LuaApiAddresses luaApiAddresses;
 		RiblixAddresses riblixAddresses;
+<<<<<<< HEAD
 		RiblixOffsets riblixOffsets;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	};
 
 	struct SharedMemoryContentDeserialized;

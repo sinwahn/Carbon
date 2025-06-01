@@ -10,13 +10,53 @@ import <iostream>;
 
 import StringUtils;
 import ExceptionBase;
+<<<<<<< HEAD
 export import Address;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 typedef unsigned char BYTE;
 
 export 
 {
 
+<<<<<<< HEAD
+=======
+	struct Address
+	{
+		constexpr Address() = default;
+		constexpr Address(uintptr_t value) : value(value) {}
+
+		constexpr void set(uintptr_t v) { value = v; }
+		constexpr uintptr_t get() const { return value; }
+
+		constexpr auto operator<=>(const Address&) const = default;
+		constexpr auto operator<=>(uintptr_t other) const { return value <=> other; }
+
+		constexpr Address& operator=(const Address& other) { value = other.value; return *this; }
+		constexpr Address& operator+=(const Address& other) { value += other.value; return *this; }
+		constexpr Address& operator-=(const Address& other) { value -= other.value; return *this; }
+		constexpr Address operator+(auto v) { return Address(value + v); }
+		constexpr Address operator-(auto v) { return Address(value - v); }
+		constexpr void operator++() { value++; }
+		constexpr void operator--() { value--; }
+		constexpr void operator++(int) { value++; }
+		constexpr void operator--(int) { value--; }
+
+		constexpr operator uintptr_t() const { return value; }
+		template <typename T>
+		constexpr operator T* () const { return (T*)value; }
+
+		template <typename T = uintptr_t>
+		T* ptr() const { return (T*)value; }
+		
+		template <typename T = uintptr_t>
+		T& deref() const { return *ptr(); }
+
+		uintptr_t value = 0;
+	};
+
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	struct Offset : Address
 	{
 		constexpr Offset() = default;
@@ -29,7 +69,11 @@ export
 		constexpr _ContextualAddress() = default;
 		constexpr _ContextualAddress(uintptr_t v) : Address(v) {}
 	};
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	struct ExternalAddress : _ContextualAddress
 	{
 		constexpr ExternalAddress() = default;

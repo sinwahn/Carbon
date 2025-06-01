@@ -67,7 +67,11 @@ int carbon_getinstancebrigdemap(lua_State* L)
 // returns false if passed categoryName is invalid
 bool pushDescriptorsTable(lua_State* L, const char* categoryName, Instance* instance)
 {
+<<<<<<< HEAD
 	auto classDescriptor = instance->getDescriptor();
+=======
+	auto classDescriptor = instance->classDescriptor;
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 	auto pushCollection = [&](auto container) {
 
@@ -260,6 +264,7 @@ int carbon_getdescriptorinfo(lua_State* L)
 		lua_createtable(L, 0, 5);
 
 		lua_pushstring(L, "Property");
+<<<<<<< HEAD
 		pushCollection(instance->getDescriptor()->properties, createPropertyInfo);
 		lua_settable(L, -3);
 
@@ -277,33 +282,72 @@ int carbon_getdescriptorinfo(lua_State* L)
 
 		lua_pushstring(L, "Callback");
 		pushCollection(instance->getDescriptor()->callbacks, createEmptyInfo);
+=======
+		pushCollection(instance->classDescriptor->properties, createPropertyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Event");
+		pushCollection(instance->classDescriptor->events, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Function");
+		pushCollection(instance->classDescriptor->functions, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "YieldFunction");
+		pushCollection(instance->classDescriptor->yieldFunctions, createEmptyInfo);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Callback");
+		pushCollection(instance->classDescriptor->callbacks, createEmptyInfo);
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		lua_settable(L, -3);
 	}
 	else
 	{
 		const char* descriptorName = luaL_checklstring(L, 2);
 
+<<<<<<< HEAD
 		if (auto property = instance->getDescriptor()->properties.getDescriptor(descriptorName))
+=======
+		if (auto property = instance->classDescriptor->properties.getDescriptor(descriptorName))
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		{
 			createPropertyInfo(L, property);
 			setCommonInfo(property);
 		}
+<<<<<<< HEAD
 		else if (auto event = instance->getDescriptor()->events.getDescriptor(descriptorName))
+=======
+		else if (auto event = instance->classDescriptor->events.getDescriptor(descriptorName))
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		{
 			createEmptyInfo(L);
 			setCommonInfo(event);
 		}
+<<<<<<< HEAD
 		else if (auto function = instance->getDescriptor()->functions.getDescriptor(descriptorName))
+=======
+		else if (auto function = instance->classDescriptor->functions.getDescriptor(descriptorName))
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		{
 			createEmptyInfo(L);
 			setCommonInfo(function);
 		}
+<<<<<<< HEAD
 		else if (auto yieldFunction = instance->getDescriptor()->yieldFunctions.getDescriptor(descriptorName))
+=======
+		else if (auto yieldFunction = instance->classDescriptor->yieldFunctions.getDescriptor(descriptorName))
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		{
 			createEmptyInfo(L);
 			setCommonInfo(yieldFunction);
 		}
+<<<<<<< HEAD
 		else if (auto callback = instance->getDescriptor()->callbacks.getDescriptor(descriptorName))
+=======
+		else if (auto callback = instance->classDescriptor->callbacks.getDescriptor(descriptorName))
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		{
 			createEmptyInfo(L);
 			setCommonInfo(callback);
@@ -321,7 +365,11 @@ int carbon_getscriptcontext(lua_State* L)
 {
 	auto extraSpace = L->userdata;
 	auto scriptContext = extraSpace->scriptContext;
+<<<<<<< HEAD
 	InstanceBridge_pushshared(L, scriptContext->getSelf().lock());
+=======
+	InstanceBridge_pushshared(L, scriptContext->self.lock());
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	return 1;
 }
 
@@ -331,7 +379,11 @@ int setDescriptorProperty(lua_State* L, DescriptorMemberProperties::PropertyType
 	const char* descriptorName = luaL_checklstring(L, 2);
 	bool newValue = luaL_checkboolean(L, 3);
 
+<<<<<<< HEAD
 	auto target = instance->getDescriptor()->getMemberDescriptor(descriptorName);
+=======
+	auto target = instance->classDescriptor->getMemberDescriptor(descriptorName);
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 	if (!target)
 		luaL_argerrorL(L, 2, "invalid descriptor name");
@@ -397,8 +449,13 @@ int carbon_getcontext(lua_State* L)
 int carbon_repush(lua_State* L)
 {
 	auto instance = checkInstance(L, 1);
+<<<<<<< HEAD
 	InstanceBridge_pushshared(L, instance->getSelf().lock());
 	InstanceBridge_pushshared(L, instance->getSelf().lock());
+=======
+	InstanceBridge_pushshared(L, instance->self.lock());
+	InstanceBridge_pushshared(L, instance->self.lock());
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	return 2;
 }
 

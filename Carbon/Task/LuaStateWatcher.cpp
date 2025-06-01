@@ -7,7 +7,10 @@ import RiblixStructures;
 import Logger;
 import TaskList;
 import DataModelWatcher;
+<<<<<<< HEAD
 import CarbonLuaApiLibs.dbglib;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 GlobalStateInfo::GlobalStateInfo(lua_State* mainThread)
 	: mainThread(mainThread)
@@ -19,9 +22,15 @@ DataModel* getAssociatedDataModel(const lua_State* L)
 {
 	if (auto extraSpace = L->userdata)
 		if (auto scriptContext = extraSpace->scriptContext)
+<<<<<<< HEAD
 			if (auto parent = scriptContext->getParent())
 				if (parent->getClassName() == "DataModel")
 					return parent;
+=======
+			if (auto parent = scriptContext->parent)
+				if (parent->getClassName() == "DataModel")
+					return DataModel::toDataModel(parent);
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 	return nullptr;
 }
@@ -35,7 +44,10 @@ FetchDataModelForStateTask::FetchDataModelForStateTask(std::weak_ptr<GlobalState
 
 Task::ExecutionResult FetchDataModelForStateTask::execute()
 {
+<<<<<<< HEAD
 	carbon_disablepointerencoding(info.lock()->mainThread);
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	if (info.expired())
 		return ExecutionResult::Fail;
 
@@ -93,11 +105,16 @@ vmStatesStats getVmStats(lua_State* L)
 		switch (gco->gch.tt)
 		{
 		case LUA_TTHREAD:
+<<<<<<< HEAD
 			if (gco->th.userdata)
 			{
 				context->stats.identitiesCount[gco->th.userdata->identity]++;
 				context->stats.statesCount++;
 			}
+=======
+			context->stats.identitiesCount[gco->th.userdata->identity]++;
+			context->stats.statesCount++;
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 			break;
 		}
 

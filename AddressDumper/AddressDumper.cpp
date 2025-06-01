@@ -653,7 +653,11 @@ private:
 	}
 
 	void checkStackAlign(Offset at) const {
+<<<<<<< HEAD
 		assert(std::div((int)at, 8).rem == 0);
+=======
+		assert(std::div(at, 8).rem == 0);
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	}
 
 	bool canAccessStack(Offset at) const
@@ -669,8 +673,13 @@ private:
 	}
 
 	bool isInStack(Address at) const {
+<<<<<<< HEAD
 		return (uintptr_t)stack.data() <= at.value 
 			&& at.value < (uintptr_t)stack.data() + stack.size();
+=======
+		return stack.data() <= at 
+			&& at < stack.data() + stack.size();
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	}
 
 	void analyzeInstruction(const ZydisDisassembledInstruction& instruction)

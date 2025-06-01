@@ -4,7 +4,10 @@ import <string>;
 import <vector>;
 import <memory>;
 import <span>;
+<<<<<<< HEAD
 import RiblixStructureOffsets;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 
 export
 {
@@ -337,7 +340,11 @@ export
 	class Capabilities
 	{
 	public:
+<<<<<<< HEAD
 		enum CapabilityType : uint64_t {
+=======
+		enum CapabilityType : uint32_t {
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 			Restricted = 0,
 			Plugin = 1ULL << 0,
 			LocalUser = 1ULL << 1,
@@ -345,12 +352,19 @@ export
 			RobloxScript = 1ULL << 3,
 			RobloxEngine = 1ULL << 4,
 			NotAccessible = 1ULL << 5,
+<<<<<<< HEAD
 
 			RunClientScript = 1ULL << 8,
 			RunServerScript = 1ULL << 9,
 			AccessOutsideWrite = 1ULL << 11,
 
 			Unassigned = 1ULL << 15,
+=======
+			RunClientScript = 1ULL << 8,
+			RunServerScript = 1ULL << 9,
+			AccessOutsideWrite = 1ULL << 11,
+			SpecialCapability = 1ULL << 15,
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 			AssetRequire = 1ULL << 16,
 			LoadString = 1ULL << 17,
 			ScriptGlobals = 1ULL << 18,
@@ -360,6 +374,7 @@ export
 			DataStore = 1ULL << 22,
 			Network = 1ULL << 23,
 			Physics = 1ULL << 24,
+<<<<<<< HEAD
 			UI = 1ULL << 25,
 			CSG = 1ULL << 26,
 			Chat = 1ULL << 27,
@@ -394,6 +409,39 @@ export
 		bool isSet(CapabilityType capability) const { return bitfield & (uint64_t)capability; }
 
 		uint64_t bitfield;
+=======
+
+			// TODO: capabilities are not inherited, find something better
+			Dummy = 1ULL << 25, // use this one as our thread marking
+
+			OurThread = Dummy,
+			All = Plugin
+			| LocalUser
+			| WritePlayer
+			| RobloxScript
+			| RobloxEngine
+			| NotAccessible
+			| RunClientScript
+			| RunServerScript
+			| AccessOutsideWrite
+			| SpecialCapability
+			| AssetRequire
+			| LoadString
+			| ScriptGlobals
+			| CreateInstances
+			| Basic
+			| Audio
+			| DataStore
+			| Network
+			| Physics,
+		};
+
+		void set(CapabilityType capability) { bitfield |= capability; }
+		void clear(CapabilityType capability) { bitfield &= ~capability; }
+		bool isSet(CapabilityType capability) const { return bitfield & capability; }
+
+		uint32_t bitfield;
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	};
 
 
@@ -446,7 +494,11 @@ export
 		Connection* head;
 	};
 
+<<<<<<< HEAD
 	struct OnDemandInstance
+=======
+	struct __declspec(novtable) OnDemandInstance
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	{
 		void* _1;
 		Signal* childAdded;
@@ -458,14 +510,21 @@ export
 		// 208 - Tags*?
 	};
 
+<<<<<<< HEAD
 	struct _OldInstance
+=======
+	struct __declspec(novtable) Instance
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	{
 		/*  0*/ void* vftable;
 		/*  8*/ msvc_weak_ptr<Instance> self;
 		/* 24*/ ClassDescriptor* classDescriptor;
 		/* 32*/ int _1[2];
 		/* 40*/ bool isArchivable;
+<<<<<<< HEAD
 		/* 48*/ OnDemandInstance* _8;
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		/* 56*/ int _2[4];
 		/* 60*/ int debugId;
 		/* 64*/ bool isParentLocked;
@@ -483,6 +542,7 @@ export
 		/* 112*/ int _6[2];
 		/* 128*/ int numExpectedChildren;
 		/* 132*/ int _7[3];
+<<<<<<< HEAD
 
 	};
 
@@ -523,6 +583,17 @@ export
 	};
 
 	struct RobloxExtraSpace : Address
+=======
+		/* 144*/ OnDemandInstance* _8;
+
+		std::string getClassName()
+		{
+			return *classDescriptor->name;
+		}
+	};
+
+	struct RobloxExtraSpace
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	{
 		// intrusive set stuff
 		RobloxExtraSpace* _1;
@@ -534,12 +605,16 @@ export
 		int identity;
 		int _6;
 		void* _7;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 		Instance* scriptContext;
 		Capabilities capabilities;
 		uint32_t _8;
 		Instance* script;
 		void* ref_count_script;
+<<<<<<< HEAD
 
 		Instance* getScriptContext() {
 			return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.scriptContext));
@@ -548,6 +623,8 @@ export
 		//Instance* getScript() {
 		//	return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.script));
 		//}
+=======
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	};
 
 	struct Context
@@ -567,10 +644,14 @@ export
 		size_t _2;
 	};
 
+<<<<<<< HEAD
 	using DataModel = Instance;
 
 	// TODO: insanely unreliable
 	struct DataModel_
+=======
+	struct DataModel
+>>>>>>> 12167be5f07cdcc1f00513a6a279704889470d1f
 	{
 		Instance* toInstance()
 		{
