@@ -128,35 +128,47 @@ int coal_getstateenv(lua_State* L)
 	return 1;
 }
 
-
-
-const char* getCapabilityName(uint32_t capability)
-{
-	if (capability == Capabilities::Restricted) return "Restricted";
-	if (capability == Capabilities::Plugin) return "Plugin";
-	if (capability == Capabilities::LocalUser) return "LocalUser";
-	if (capability == Capabilities::WritePlayer) return "WritePlayer";
-	if (capability == Capabilities::RobloxScript) return "RobloxScript";
-	if (capability == Capabilities::RobloxEngine) return "RobloxEngine";
-	if (capability == Capabilities::NotAccessible) return "NotAccessible";
-	if (capability == Capabilities::RunClientScript) return "RunClientScript";
-	if (capability == Capabilities::RunServerScript) return "RunServerScript";
-	if (capability == Capabilities::AccessOutsideWrite) return "AccessOutsideWrite";
-	if (capability == Capabilities::SpecialCapability) return "SpecialCapability";
-	if (capability == Capabilities::AssetRequire) return "AssetRequire";
-	if (capability == Capabilities::LoadString) return "LoadString";
-	if (capability == Capabilities::ScriptGlobals) return "ScriptGlobals";
-	if (capability == Capabilities::CreateInstances) return "CreateInstances";
-	if (capability == Capabilities::Basic) return "Basic";
-	if (capability == Capabilities::Audio) return "Audio";
-	if (capability == Capabilities::DataStore) return "DataStore";
-	if (capability == Capabilities::Network) return "Network";
-	if (capability == Capabilities::Physics) return "Physics";
-	if (capability == Capabilities::Dummy) return "Dummy";
-
+const char* getCapabilityName(Capabilities::CapabilityType capability_) {
+	using enum Capabilities::CapabilityType;
+	auto capability = (uint64_t)capability_;
+	if (!capability) return "Restricted";
+	if (capability & (uint64_t)Plugin) return "Plugin";
+	if (capability & (uint64_t)LocalUser) return "LocalUser";
+	if (capability & (uint64_t)WritePlayer) return "WritePlayer";
+	if (capability & (uint64_t)RobloxScript) return "RobloxScript";
+	if (capability & (uint64_t)RobloxEngine) return "RobloxEngine";
+	if (capability & (uint64_t)NotAccessible) return "NotAccessible";
+	if (capability & (uint64_t)RunClientScript) return "RunClientScript";
+	if (capability & (uint64_t)RunServerScript) return "RunServerScript";
+	if (capability & (uint64_t)AccessOutsideWrite) return "AccessOutsideWrite";
+	if (capability & (uint64_t)Unassigned) return "Unassigned";
+	if (capability & (uint64_t)AssetRequire) return "AssetRequire";
+	if (capability & (uint64_t)LoadString) return "LoadString";
+	if (capability & (uint64_t)ScriptGlobals) return "ScriptGlobals";
+	if (capability & (uint64_t)CreateInstances) return "CreateInstances";
+	if (capability & (uint64_t)Basic) return "Basic";
+	if (capability & (uint64_t)Audio) return "Audio";
+	if (capability & (uint64_t)DataStore) return "DataStore";
+	if (capability & (uint64_t)Network) return "Network";
+	if (capability & (uint64_t)Physics) return "Physics";
+	if (capability & (uint64_t)UI) return "UI";
+	if (capability & (uint64_t)CSG) return "CSG";
+	if (capability & (uint64_t)Chat) return "Chat";
+	if (capability & (uint64_t)Animation) return "Animation";
+	if (capability & (uint64_t)Avatar) return "Avatar";
+	if (capability & (uint64_t)Input) return "Input";
+	if (capability & (uint64_t)Environment) return "Environment";
+	if (capability & (uint64_t)RemoteEvent) return "RemoteEvent";
+	if (capability & (uint64_t)LegacySound) return "LegacySound";
+	if (capability & (uint64_t)Players) return "Players";
+	if (capability & (uint64_t)CapabilityControl) return "CapabilityControl";
+	if (capability & (uint64_t)InternalTest) return "InternalTest";
+	if (capability & (uint64_t)PluginOrOpenCloud) return "PluginOrOpenCloud";
+	if (capability & (uint64_t)Assistant) return "Assistant";
 	return "Unknown";
 }
 
+<<<<<<< HEAD:Coal/libs/baselib.ixx
 Capabilities::CapabilityType nameToCapability(const char* name)
 {
 	if (strcmp_caseInsensitive(name, "All"))
@@ -206,6 +218,47 @@ Capabilities::CapabilityType nameToCapability(const char* name)
 	if (strcmp_caseInsensitive(name, "Physics")) return Capabilities::Physics;
 
 	return Capabilities::Restricted;
+=======
+Capabilities::CapabilityType nameToCapability(const char* name) {
+	using enum Capabilities::CapabilityType;
+	if (strcmp_caseInsensitive(name, "Restricted")) return Restricted;
+	if (strcmp_caseInsensitive(name, "Plugin")) return Plugin;
+	if (strcmp_caseInsensitive(name, "LocalUser")) return LocalUser;
+	if (strcmp_caseInsensitive(name, "WritePlayer")) return WritePlayer;
+	if (strcmp_caseInsensitive(name, "RobloxScript")) return RobloxScript;
+	if (strcmp_caseInsensitive(name, "RobloxEngine")) return RobloxEngine;
+	if (strcmp_caseInsensitive(name, "NotAccessible")) return NotAccessible;
+	if (strcmp_caseInsensitive(name, "RunClientScript")) return RunClientScript;
+	if (strcmp_caseInsensitive(name, "RunServerScript")) return RunServerScript;
+	if (strcmp_caseInsensitive(name, "AccessOutsideWrite")) return AccessOutsideWrite;
+	if (strcmp_caseInsensitive(name, "Unassigned")) return Unassigned;
+	if (strcmp_caseInsensitive(name, "AssetRequire")) return AssetRequire;
+	if (strcmp_caseInsensitive(name, "LoadString")) return LoadString;
+	if (strcmp_caseInsensitive(name, "ScriptGlobals")) return ScriptGlobals;
+	if (strcmp_caseInsensitive(name, "CreateInstances")) return CreateInstances;
+	if (strcmp_caseInsensitive(name, "Basic")) return Basic;
+	if (strcmp_caseInsensitive(name, "Audio")) return Audio;
+	if (strcmp_caseInsensitive(name, "DataStore")) return DataStore;
+	if (strcmp_caseInsensitive(name, "Network")) return Network;
+	if (strcmp_caseInsensitive(name, "Physics")) return Physics;
+	if (strcmp_caseInsensitive(name, "UI")) return UI;
+	if (strcmp_caseInsensitive(name, "CSG")) return CSG;
+	if (strcmp_caseInsensitive(name, "Chat")) return Chat;
+	if (strcmp_caseInsensitive(name, "Animation")) return Animation;
+	if (strcmp_caseInsensitive(name, "Avatar")) return Avatar;
+	if (strcmp_caseInsensitive(name, "Input")) return Input;
+	if (strcmp_caseInsensitive(name, "Environment")) return Environment;
+	if (strcmp_caseInsensitive(name, "RemoteEvent")) return RemoteEvent;
+	if (strcmp_caseInsensitive(name, "LegacySound")) return LegacySound;
+	if (strcmp_caseInsensitive(name, "Players")) return Players;
+	if (strcmp_caseInsensitive(name, "CapabilityControl")) return CapabilityControl;
+	if (strcmp_caseInsensitive(name, "InternalTest")) return InternalTest;
+	if (strcmp_caseInsensitive(name, "PluginOrOpenCloud")) return PluginOrOpenCloud;
+	if (strcmp_caseInsensitive(name, "Assistant")) return Assistant;
+	if (strcmp_caseInsensitive(name, "Unknown")) return Unknown;
+	if (strcmp_caseInsensitive(name, "All")) return All;
+	return Restricted;
+>>>>>>> f0ff9a0 (- Automatic structure offset analyzer):Carbon/libs/baselib.ixx
 }
 
 int coal_setcapability(lua_State* L)
@@ -289,7 +342,11 @@ int coal_getcallingscript(lua_State* L)
 {
 	auto extraSpace = L->userdata;
 	if (auto script = extraSpace->script)
+<<<<<<< HEAD:Coal/libs/baselib.ixx
 		InstanceBridge_pushshared(L, script->shared.lock());
+=======
+		InstanceBridge_pushshared(L, script->getSelf().lock());
+>>>>>>> f0ff9a0 (- Automatic structure offset analyzer):Carbon/libs/baselib.ixx
 	else
 		lua_pushnil(L);
 
@@ -330,7 +387,7 @@ int coal_getnilinstances(lua_State* L)
 		{
 			if (auto instance = toInstance(L, -1))
 			{
-				if (instance->parent == nullptr)
+				if (instance->getParent() == nullptr)
 				{
 					lua_pushinteger(L, ++index); // Stack: result, map, k, v, index
 					lua_pushvalue(L, -2); // Stack: result, map, k, v, index, v

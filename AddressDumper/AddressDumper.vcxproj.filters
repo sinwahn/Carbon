@@ -21,6 +21,24 @@
     <ClCompile Include="Zydis.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
+=======
+    <ClCompile Include="..\Common\StringUtils.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ExceptionBase.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Formatter.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Address.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> f0ff9a0 (- Automatic structure offset analyzer)
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zydis.h">
