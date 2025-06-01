@@ -199,6 +199,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\ExceptionBase.ixx" />
+    <ClCompile Include="..\Common\Formatter.ixx" />
+    <ClCompile Include="..\Common\LuauTypes.ixx" />
+    <ClCompile Include="..\Common\Pipes.ixx" />
     <ClCompile Include="..\Common\RiblixStructureOffsets.ixx" />
     <ClCompile Include="..\Common\RiblixStructures.ixx" />
     <ClCompile Include="..\Common\RttiDescriptorContainer.ixx" />
