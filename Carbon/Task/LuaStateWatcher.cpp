@@ -18,7 +18,7 @@ GlobalStateInfo::GlobalStateInfo(lua_State* mainThread)
 DataModel* getAssociatedDataModel(const lua_State* L)
 {
 	if (auto extraSpace = L->userdata)
-		if (auto scriptContext = extraSpace->scriptContext)
+		if (auto scriptContext = extraSpace->getScriptContext())
 			if (auto parent = scriptContext->getParent())
 				if (parent->getClassName() == "DataModel")
 					return parent;

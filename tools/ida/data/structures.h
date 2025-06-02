@@ -8,15 +8,12 @@ typedef unsigned int       uint32_t;
 typedef unsigned long long uint64_t;
 typedef unsigned __int64  uintptr_t;
 
-
 typedef double L_Umaxalign;
 struct GCObject
 {
     uint8_t tt; uint8_t marked; uint8_t memcat;
     char _[168];
 };
-
-typedef double L_Umaxalign;
 
 struct TString
 {
@@ -301,22 +298,25 @@ struct lua_Debug
     char ssbuf[256];
 };
 
-struct lua_Callbacks
-{
-    void* userdata; // arbitrary userdata pointer that is never overwritten by Luau
+typedef void (*lua_InterruptFn)(lua_State* L, int gc);
+typedef void (*lua_PanicFn)(lua_State* L, int errcode);
+typedef void (*lua_UserThreadFn)(lua_State* LP, lua_State* L);
+typedef int16_t (*lua_UserAtomFn)(const char* s, size_t l);
+typedef void (*lua_DebugFn)(lua_State* L, lua_Debug* ar);
+typedef void (*lua_ProtectedErrorFn)(lua_State* L);
+typedef void (*lua_OnAllocateFn)(lua_State* L, size_t osize, size_t nsize);
 
-    void (*interrupt)(lua_State* L, int gc);  // gets called at safepoints (loop back edges, call/ret, gc) if set
-    void (*panic)(lua_State* L, int errcode); // gets called when an unprotected error is raised (if longjmp is used)
-
-    void (*userthread)(lua_State* LP, lua_State* L); // gets called when L is created (LP == parent) or destroyed (LP == NULL)
-    int16_t(*useratom)(const char* s, size_t l);    // gets called when a string is created; returned atom can be retrieved via tostringatom
-
-    void (*debugbreak)(lua_State* L, lua_Debug* ar);     // gets called when BREAK instruction is encountered
-    void (*debugstep)(lua_State* L, lua_Debug* ar);      // gets called after each instruction in single step mode
-    void (*debuginterrupt)(lua_State* L, lua_Debug* ar); // gets called when thread execution is interrupted by break in another thread
-    void (*debugprotectederror)(lua_State* L);           // gets called when protected call results in an error
-
-    void (*onallocate)(lua_State* L, size_t osize, size_t nsize); // gets called when memory is allocated
+struct lua_Callbacks {
+    void* userdata;
+    lua_InterruptFn interrupt;
+    lua_PanicFn panic;
+    lua_UserThreadFn userthread;
+    lua_UserAtomFn useratom;
+    lua_DebugFn debugbreak;
+    lua_DebugFn debugstep;
+    lua_DebugFn debuginterrupt;
+    lua_ProtectedErrorFn debugprotectederror;
+    lua_OnAllocateFn onallocate;
 };
 
 typedef void* (*lua_Alloc)(void* ud, void* ptr, size_t osize, size_t nsize);
@@ -348,23 +348,35 @@ struct GCStats
     double endtimestamp;
 };
 
+struct lua_Callbacks
+{
+    void* userdata; // arbitrary userdata pointer that is never overwritten by Luau
+
+    void (*interrupt)(lua_State* L, int gc);  // gets called at safepoints (loop back edges, call/ret, gc) if set
+    void (*panic)(lua_State* L, int errcode); // gets called when an unprotected error is raised (if longjmp is used)
+
+    void (*userthread)(lua_State* LP, lua_State* L); // gets called when L is created (LP == parent) or destroyed (LP == NULL)
+    int16_t(*useratom)(const char* s, size_t l);    // gets called when a string is created; returned atom can be retrieved via tostringatom
+
+    void (*debugbreak)(lua_State* L, lua_Debug* ar);     // gets called when BREAK instruction is encountered
+    void (*debugstep)(lua_State* L, lua_Debug* ar);      // gets called after each instruction in single step mode
+    void (*debuginterrupt)(lua_State* L, lua_Debug* ar); // gets called when thread execution is interrupted by break in another thread
+    void (*debugprotectederror)(lua_State* L);           // gets called when protected call results in an error
+};
+
 struct global_State
 {
     stringtable strt; // hash table for strings
 
-
     lua_Alloc frealloc;   // function to reallocate memory
     void* ud;            // auxiliary data to `frealloc'
-
 
     uint8_t currentwhite;
     uint8_t gcstate; // state of garbage collector
 
-
     void* gray;      // list of gray objects
     void* grayagain; // list of objects to be traversed atomically
     void* weak;     // list of weak tables (to be cleared)
-
 
     size_t GCthreshold;                       // when totalbytes > GCthreshold, run GC step
     size_t totalbytes;                        // number of bytes currently allocated
@@ -397,7 +409,7 @@ struct global_State
     uint64_t rngstate; // PCG random number generator state
     uint64_t ptrenckey[4]; // pointer encoding key for display
 
-    void* cb[10];
+    lua_Callbacks cb;
 
     lua_ExecutionCallbacks ecb;
 

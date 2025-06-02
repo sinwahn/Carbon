@@ -534,14 +534,14 @@ export
 		int _6;
 		void* _7;
 
-		Instance* scriptContext;
+		Instance* _scriptContext;
 		Capabilities capabilities;
 		uint32_t _8;
 		Instance* script;
-		void* ref_count_script;
+		//void* ref_count_script;
 
 		Instance* getScriptContext() {
-			return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.scriptContext));
+			return *(Instance**)(getAddress(riblixOffsets.RobloxExtraSpace.scriptContext));
 		}
 
 		//Instance* getScript() {

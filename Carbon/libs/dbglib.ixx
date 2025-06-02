@@ -320,7 +320,7 @@ int carbon_getdescriptorinfo(lua_State* L)
 int carbon_getscriptcontext(lua_State* L)
 {
 	auto extraSpace = L->userdata;
-	auto scriptContext = extraSpace->scriptContext;
+	auto scriptContext = extraSpace->getScriptContext();
 	InstanceBridge_pushshared(L, scriptContext->getSelf().lock());
 	return 1;
 }
