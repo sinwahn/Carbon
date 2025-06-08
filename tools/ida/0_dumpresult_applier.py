@@ -11,6 +11,7 @@ def apply_names_from_file(path):
         return
 
     base = idaapi.get_imagebase()
+    print("FUCK", base)
     count = 0
 
     with open(path, 'r') as f:

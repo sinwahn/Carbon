@@ -9,9 +9,9 @@ import idautils
 import os
 
 SCRIPT_DIR = os.path.dirname(__file__)
-DUMP_FILE = os.path.join(SCRIPT_DIR, "dumpresult.txt")
-LUA_HEADER = os.path.join(SCRIPT_DIR, "lua.h")
-LUALIB_HEADER = os.path.join(SCRIPT_DIR, "lualib.h")
+DUMP_FILE = os.path.join(SCRIPT_DIR, "data/dumpresult.txt")
+LUA_HEADER = os.path.join(SCRIPT_DIR, "data/lua.h")
+LUALIB_HEADER = os.path.join(SCRIPT_DIR, "data/lualib.h")
 
 def parse_lua_header(file_path):
     if not os.path.isfile(file_path):

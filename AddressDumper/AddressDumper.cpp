@@ -312,6 +312,45 @@ std::vector<ExternalAddress> getCallingFunctions(const FunctionData& functionDat
 	return result;
 }
 
+bool isInstanceBridge_push(const FunctionData& functionData, ExternalAddress pushnilAddress)
+{
+	DisassemblerState state(functionData);
+
+	// instanceBridge_push has 3 funcs
+	// if (a()) b(); else pushnil();
+
+	int calls = 0;
+	int jumps = 0;
+
+	int pointsToPushNil = 0;
+
+	do
+	{
+		if (!state.next())
+			raise("getInstruction disassemble failed");
+
+		auto& instruction = state.getInstruction();
+		if (instruction.info.mnemonic == ZYDIS_MNEMONIC_CALL)
+		{
+			calls++;
+			if (state.getCurrentJumpAddress(0) == pushnilAddress)
+				pointsToPushNil++;
+		}
+
+		if (instruction.info.mnemonic == ZYDIS_MNEMONIC_JMP)
+		{
+			jumps++;
+			if (state.getCurrentJumpAddress(0) == pushnilAddress)
+				pointsToPushNil++;
+		}
+
+		state.post();
+
+	} while (!state.isPrologue());
+
+	return (calls + jumps == 3) && (pointsToPushNil == 1);
+}
+
 ExternalAddress getCallingFunctionAt(const FunctionData& functionData, size_t index)
 {
 	DisassemblerState state(functionData);
@@ -994,6 +1033,10 @@ public:
 		return ::getLeaSources(functionDataFromAddress(inFunction));
 	}
 
+	bool isInstanceBridge_push(const ExternalAddress& inFunction, ExternalAddress pushnil) const {
+		return ::isInstanceBridge_push(functionDataFromAddress(inFunction), pushnil);
+	}
+
 	FunctionData getNextFunction(ExternalAddress firstFunction) const {
 		return ::getNextFunction(functionDataFromAddress(firstFunction));
 	}
@@ -1112,8 +1155,20 @@ public:
 
 				dumpInfo.newRegistrar("ScriptContext__settings")
 					.add("ScriptContext__getCurrentContext", ScriptContext__getCurrentContext)
-					.add("throwLackingCapability", calls.at(2))
-					.add("InstanceBridge_pushshared", calls.at(4));
+					.add("throwLackingCapability", calls.at(2));
+
+				for (auto callee : calls)
+				{
+					if (!callee)
+						continue;
+
+					if (isInstanceBridge_push(callee, dumpInfo.get("lua_pushnil")))
+					{
+						dumpInfo.add("ScriptContext__settings",
+							"InstanceBridge_pushshared", callee);
+						break;
+					}
+				}
 			}
 
 			{

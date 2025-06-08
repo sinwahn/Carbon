@@ -3,7 +3,7 @@ import idaapi
 import re
 
 SCRIPT_DIR = os.path.dirname(__file__)
-HEADER_FILE = os.path.join(SCRIPT_DIR, "structures.h")
+HEADER_FILE = os.path.join(SCRIPT_DIR, "data/structures.h")
 
 def extract_struct_blocks(text):
     lines = text.splitlines()
