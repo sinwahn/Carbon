@@ -25,38 +25,31 @@ void luaL_register(lua_State* L, const luaL_Reg* l)
 	}
 }
 
-// keeps copy on stack
-void registerLibCopy(lua_State* L, const char* name, Table* from)
+void moveLibItems(lua_State* L, const char* libName, Table* env, Table* destination)
 {
-	lua_createtable(L, 0, 0);
-	lua_pushrawtable(L, from);
-	lua_getfield(L, -1, name);
+	lua_pushrawtable(L, env); // env
+	lua_getfield(L, -1, libName); // env, lib
 
-	int index = 0;
-	lua_pushnil(L); // Stack: result, lib, nil
-	while (lua_next(L, -2)) // Stack: result, lib, k, v
+	lua_pushnil(L); // env, lib, nil
+	while (lua_next(L, -2)) // env, lib, k, v
 	{
-		lua_pushvalue(L, -2); // Stack: result, lib, k, v, k
-		lua_pushvalue(L, -2); // Stack: result, lib, k, v, k, v
-		lua_settable(L, -6); // Stack: result, lib, k, v
-		lua_pop(L, 1); // Stack: result, lib, k
+		lua_pushrawtable(L, destination); // env, lib, k, v, target
+		lua_pushvalue(L, -3); // env, lib, k, v, target, k
+		lua_pushvalue(L, -3); // env, lib, k, v, target, k, v
+		lua_settable(L, -3); // env, lib, k, v, target
+		lua_pop(L, 1); // env, lib, k, v
+		lua_pop(L, 1); // env, lib, k
 	}
 
-	lua_pop(L, 1); // Stack: result
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -3, name);
+	lua_pop(L, 2); // pop env & lib
 }
 
-void registerFunction(lua_State* L, lua_CFunction function, const char* name, bool addAlsoAsGlobal = false)
+void registerFunction(lua_State* L, Table* destination, lua_CFunction function, const char* name)
 {
+	lua_pushrawtable(L, destination);
 	lua_pushcclosure(L, function, name);
 	lua_setfield(L, -2, name);
-
-	if (addAlsoAsGlobal)
-	{
-		lua_pushcclosure(L, function, name);
-		lua_setglobal(L, name);
-	}
+	lua_pop(L, 1);
 }
 
 Table* getrenv(lua_State* L, bool asMainThread)
@@ -135,13 +128,22 @@ void LuaApiRuntimeState::injectEnvironment(std::shared_ptr<GlobalStateInfo> info
 
 		// debug
 		{
-			registerLibCopy(L, "debug", renv);
+			lua_createtable(L);
+			Table* debug = lua_totable(L, -1);
+			lua_pushvalue(L, -1);
+			lua_setfield(L, -3, "debug");
 
 			luaL_register(L, closureDebugLibrary);
-			if (luaApiRuntimeState.getLuaSettings().allow_setproto)
-				registerFunction(L, carbon_setproto, "setproto", true);
 
-			lua_totable(L, -1)->readonly = true;
+			moveLibItems(L, "debug", renv, debug);
+
+			if (luaApiRuntimeState.getLuaSettings().allow_setproto)
+			{
+				registerFunction(L, genv, carbon_setproto, "setproto");
+				registerFunction(L, debug, carbon_setproto, "setproto");
+			}
+
+			debug->readonly = true;
 			lua_pop(L, 1);
 		}
 
