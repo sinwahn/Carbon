@@ -134,7 +134,6 @@ export
 	};
 
 
-	template<typename T>
 	struct msvc_Ref_count_base;
 
 	template<typename T>
@@ -144,7 +143,7 @@ export
 	struct msvc_shared_ptr
 	{
 		T* object;
-		msvc_Ref_count_base<T>* controlBlock;
+		msvc_Ref_count_base* controlBlock;
 
 		T& operator*() const { return *object; }
 		T* operator->() const { return object; }
@@ -154,7 +153,6 @@ export
 		bool constructFromWeak(const msvc_weak_ptr<T>& other);
 	};
 
-	template<typename T>
 	struct msvc_Ref_count_base
 	{
 		void* vftable;
@@ -177,7 +175,7 @@ export
 	struct msvc_weak_ptr
 	{
 		T* object; // nullptr if deleted
-		msvc_Ref_count_base<T>* controlBlock;
+		msvc_Ref_count_base* controlBlock;
 
 		msvc_shared_ptr<T> lock()
 		{
@@ -202,7 +200,7 @@ export
 		return false;
 	}
 
-	struct __declspec(novtable) Descriptor
+	struct Descriptor
 	{
 		void* vftable;
 		const msvc_string* name;
@@ -231,7 +229,7 @@ export
 		uint32_t bitfield;
 	};
 
-	struct __declspec(novtable) MemberDescriptor : public Descriptor
+	struct MemberDescriptor : public Descriptor
 	{
 		const msvc_string* category;
 		struct ClassDescriptor* owner;
@@ -247,7 +245,7 @@ export
 		void* _8;
 	};
 
-	struct __declspec(novtable) PropertyDescriptor : public MemberDescriptor
+	struct PropertyDescriptor : public MemberDescriptor
 	{
 		struct GetSet {
 			void* vftable;
@@ -256,12 +254,12 @@ export
 		} *getset;
 	};
 
-	struct __declspec(novtable) EventDescriptor : public MemberDescriptor
+	struct EventDescriptor : public MemberDescriptor
 	{
 
 	};
 
-	struct __declspec(novtable) FunctionDescriptor : public MemberDescriptor
+	struct FunctionDescriptor : public MemberDescriptor
 	{
 		void* _1;
 		void* _2;
@@ -269,7 +267,7 @@ export
 		void* function; //?
 	};
 
-	struct __declspec(novtable) YieldFunctionDescriptor : public MemberDescriptor
+	struct YieldFunctionDescriptor : public MemberDescriptor
 	{
 		void* _1;
 		void* _2;
@@ -277,13 +275,13 @@ export
 		void* function; //?
 	};
 
-	struct __declspec(novtable) CallbackDescriptor : public MemberDescriptor
+	struct CallbackDescriptor : public MemberDescriptor
 	{
 
 	};
 
 	template <typename Member>
-	struct __declspec(novtable) MemberDescriptorContainer
+	struct MemberDescriptorContainer
 	{
 		msvc_vector<Member*> collection;
 		char __pad[168 - sizeof(collection)];
@@ -303,8 +301,7 @@ export
 		}
 	};
 
-	struct __declspec(novtable) ClassDescriptor
-		: public Descriptor
+	struct ClassDescriptor : public Descriptor
 	{
 		MemberDescriptorContainer<PropertyDescriptor> properties;
 		MemberDescriptorContainer<EventDescriptor> events;

@@ -47,7 +47,7 @@ export
 
 			RobloxExtraSpace.findScriptContext(extraSpace);
 			auto scriptContext = tryDereference((uintptr_t)extraSpace, RobloxExtraSpace.scriptContext).value();
-			
+
 			Instance.findParent(scriptContext);
 			auto dataModel = tryDereference(scriptContext, Instance.parent).value();
 
@@ -58,7 +58,19 @@ export
 			initialized = true;
 		}
 
-		struct
+		struct Descriptor
+		{
+			void printPadding(std::string& ss, int currentOffset, int nextOffset) const {
+				int gap = nextOffset - currentOffset;
+				if (gap > 0) {
+					char buf[32];
+					snprintf(buf, sizeof(buf), "\tchar pad_%x[%d];\n", currentOffset, gap);
+					ss += buf;
+				}
+			}
+		};
+
+		struct : Descriptor
 		{
 			// finds with msvc rtti
 			void findDescriptor(uintptr_t someInstance)
@@ -101,6 +113,40 @@ export
 					pointerToRttiNamedBySubstring("RBX::DataModel"));
 			}
 
+			std::string print() const {
+				std::string ss = "struct Instance {\n";
+				int currentOffset = 0;
+
+				ss += "\tvoid* vftable;\n";
+				currentOffset += 8;
+
+				ss += "\tmsvc_weak_ptr_Instance self;\n";
+				currentOffset += 16;
+
+				if (descriptor != kInvalidOffset) {
+					printPadding(ss, currentOffset, descriptor);
+					ss += "\tClassDescriptor* descriptor;\n";
+					currentOffset = descriptor + 8;
+				}
+				if (name != kInvalidOffset) {
+					printPadding(ss, currentOffset, name);
+					ss += "\tchar* name;\n";
+					currentOffset = name + 8;
+				}
+				if (children != kInvalidOffset) {
+					printPadding(ss, currentOffset, children);
+					ss += "\tmsvc_shared_ptr_vector_shared_ptr_Instance children;\n";
+					currentOffset = children + 8;
+				}
+				if (parent != kInvalidOffset) {
+					printPadding(ss, currentOffset, parent);
+					ss += "\tInstance* parent;\n";
+				}
+
+				ss += "};\n";
+				return ss;
+			}
+
 			int descriptor = kInvalidOffset;
 			int name = kInvalidOffset;
 			int children = kInvalidOffset;
@@ -108,7 +154,7 @@ export
 
 		} Instance;
 
-		struct
+		struct : Descriptor
 		{
 			int scriptContext = kInvalidOffset;
 
@@ -119,7 +165,28 @@ export
 					pointerToRttiNamedBySubstring("RBX::ScriptContext"));
 			}
 
+			std::string print() const {
+				std::string ss = "struct RobloxExtraSpace {\n";
+				int currentOffset = 0;
+
+				if (scriptContext != kInvalidOffset) {
+					printPadding(ss, currentOffset, scriptContext);
+					ss += "\tInstance* scriptContext;\n";
+				}
+
+				ss += "};\n";
+				return ss;
+			}
+
 		} RobloxExtraSpace;
+
+
+		std::string print() const {
+			std::string ss;
+			ss += Instance.print();
+			ss += RobloxExtraSpace.print();
+			return ss;
+		}
 	};
 
 	inline RiblixOffsets riblixOffsets;

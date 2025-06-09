@@ -12,6 +12,7 @@ SCRIPT_DIR = os.path.dirname(__file__)
 DUMP_FILE = os.path.join(SCRIPT_DIR, "data/dumpresult.txt")
 LUA_HEADER = os.path.join(SCRIPT_DIR, "data/lua.h")
 LUALIB_HEADER = os.path.join(SCRIPT_DIR, "data/lualib.h")
+RIBLIX_HEADER = os.path.join(SCRIPT_DIR, "data/riblixapi.h")
 
 def parse_lua_header(file_path):
     if not os.path.isfile(file_path):
@@ -91,21 +92,25 @@ def apply_type_info(callee_name, callee_prototype_decl):
         if not ida_typeinf.apply_callee_tinfo(xref, tif):
             print(f"Could not apply type info @ {xref:x}")
 
+    return True
+
 declarations = {}
 declarations.update(parse_lua_header(LUA_HEADER))
 declarations.update(parse_lua_header(LUALIB_HEADER))
+declarations.update(parse_lua_header(RIBLIX_HEADER))
 
 for name, declaration in declarations.items():
-    print(f"Function Name: {name}")
     print(f"Declaration: {declaration}")
 
-functionToEa = find_lua_functions()
+typed_count = 0
 
-# Apply types to all identified functions
-for name, addr in functionToEa.items():
-    type_name = declarations.get(name)
-    if type_name:
-        if apply_type_info(name, type_name):
+for name, decl in declarations.items():
+    ea = idc.get_name_ea_simple(name)
+    if ea != idc.BADADDR:
+        print(f"[INFO] Found {name} @ 0x{ea:X}")
+        if apply_type_info(name, decl):
             typed_count += 1
     else:
-        print(f"[INFO] No type mapping for {name} @ 0x{addr:X}")
+        print(f"[INFO] {name} not found in IDA database")
+
+print(f"[INFO] Applied types to {typed_count} functions")

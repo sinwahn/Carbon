@@ -53,6 +53,8 @@ SharedMemoryContentDeserialized sharedMemoryContent;
 
 void realMain()
 {
+	logger.log(riblixOffsets.print());
+
 	basicTryWrapper("realMain", [&]() {
 		try
 		{
@@ -205,6 +207,7 @@ LONG panic(_EXCEPTION_POINTERS* ep)
 
 	result += getStackTrace(ep->ContextRecord);
 	Console::getInstance() << result << std::endl;
+	logger.log(result);
 
 	Sleep(-1);
 	abort();

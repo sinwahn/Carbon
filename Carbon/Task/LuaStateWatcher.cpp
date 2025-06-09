@@ -72,6 +72,7 @@ struct vmStatesStats
 	std::map<int, uint32_t> identitiesCount;
 };
 
+// might crash on close due to some race deletion
 vmStatesStats getVmStats(lua_State* L)
 {
 	struct gcvisit

@@ -239,7 +239,7 @@ struct lua_State
 
     TString* namecall; // when invoked from Luau using NAMECALL, what method do we need to invoke?
 
-    void* userdata;
+    RobloxExtraSpace* userdata;
 };
 
 typedef int (*lua_CFunction)(lua_State* L);
@@ -348,22 +348,6 @@ struct GCStats
     double endtimestamp;
 };
 
-struct lua_Callbacks
-{
-    void* userdata; // arbitrary userdata pointer that is never overwritten by Luau
-
-    void (*interrupt)(lua_State* L, int gc);  // gets called at safepoints (loop back edges, call/ret, gc) if set
-    void (*panic)(lua_State* L, int errcode); // gets called when an unprotected error is raised (if longjmp is used)
-
-    void (*userthread)(lua_State* LP, lua_State* L); // gets called when L is created (LP == parent) or destroyed (LP == NULL)
-    int16_t(*useratom)(const char* s, size_t l);    // gets called when a string is created; returned atom can be retrieved via tostringatom
-
-    void (*debugbreak)(lua_State* L, lua_Debug* ar);     // gets called when BREAK instruction is encountered
-    void (*debugstep)(lua_State* L, lua_Debug* ar);      // gets called after each instruction in single step mode
-    void (*debuginterrupt)(lua_State* L, lua_Debug* ar); // gets called when thread execution is interrupted by break in another thread
-    void (*debugprotectederror)(lua_State* L);           // gets called when protected call results in an error
-};
-
 struct global_State
 {
     stringtable strt; // hash table for strings
@@ -419,4 +403,222 @@ struct global_State
     TString* lightuserdataname[128]; // names for tagged lightuserdata
 
     GCStats gcstats;
+};
+
+
+// riblix part
+
+struct msvc_string {
+    union {
+        char* largeBuffer;
+        char buffer[16];
+    };
+    size_t mySize;
+    size_t myCapacity;
+};
+
+
+struct msvc_Ref_count_base
+{
+	void* vftable;
+	unsigned long uses;
+	unsigned long weaks;
+};
+
+
+
+struct Descriptor {
+    void* vftable;
+    msvc_string* name;
+    void* _1;
+    size_t _2;
+    size_t _3;
+};
+
+
+struct DescriptorMemberProperties
+{
+    unsigned IsPublic : 1;
+    unsigned IsEditable : 1;
+    unsigned CanReplicate : 1;
+    unsigned CanXmlRead : 1;
+    unsigned CanXmlWrite : 1;
+    unsigned IsScriptable : 1;
+    unsigned AlwaysClone : 1;
+};
+
+struct MemberDescriptor
+{
+	Descriptor descriptor;
+	const msvc_string* category;
+	struct ClassDescriptor* owner;
+	void* _1;
+	DescriptorMemberProperties properties;
+	int _2;
+	void* TType;
+	void* _3;
+	void* _4;
+	void* _5;
+	void* _6;
+	void* _7;
+	void* _8;
+};
+
+struct PropertyDescriptor
+{
+	MemberDescriptor memberDescriptor;
+	struct GetSet {
+		void* vftable;
+		void* get;
+		void* set;
+	} *getset;
+};
+
+struct EventDescriptor
+{
+	MemberDescriptor memberDescriptor;
+};
+
+struct FunctionDescriptor
+{
+	MemberDescriptor memberDescriptor;
+	void* _1;
+	void* _2;
+	void** _vftable; // ? array of functions
+	void* function; //?
+};
+
+struct YieldFunctionDescriptor
+{
+	MemberDescriptor memberDescriptor;
+	void* _1;
+	void* _2;
+	void** _3; //?
+	void* function; //?
+};
+
+struct CallbackDescriptor
+{
+	MemberDescriptor memberDescriptor;
+};
+
+
+struct msvc_vector_PropertyDescriptorPtr {
+    PropertyDescriptor** first;
+    PropertyDescriptor** last;
+    PropertyDescriptor** limit;
+};
+
+struct msvc_vector_EventDescriptorPtr {
+    EventDescriptor** first;
+    EventDescriptor** last;
+    EventDescriptor** limit;
+};
+
+struct msvc_vector_FunctionDescriptorPtr {
+    FunctionDescriptor** first;
+    FunctionDescriptor** last;
+    FunctionDescriptor** limit;
+};
+
+struct msvc_vector_YieldFunctionDescriptorPtr {
+    YieldFunctionDescriptor** first;
+    YieldFunctionDescriptor** last;
+    YieldFunctionDescriptor** limit;
+};
+
+struct msvc_vector_CallbackDescriptorPtr {
+    CallbackDescriptor** first;
+    CallbackDescriptor** last;
+    CallbackDescriptor** limit;
+};
+
+struct MemberDescriptorContainer_PropertyDescriptor {
+    msvc_vector_PropertyDescriptorPtr collection;
+    char __pad[168 - 0x18];
+};
+
+struct MemberDescriptorContainer_EventDescriptor {
+    msvc_vector_EventDescriptorPtr collection;
+    char __pad[168 - 0x18];
+};
+
+struct MemberDescriptorContainer_FunctionDescriptor {
+    msvc_vector_FunctionDescriptorPtr collection;
+    char __pad[168 - 0x18];
+};
+
+struct MemberDescriptorContainer_YieldFunctionDescriptor {
+    msvc_vector_YieldFunctionDescriptorPtr collection;
+    char __pad[168 - 0x18];
+};
+
+struct MemberDescriptorContainer_CallbackDescriptor {
+    msvc_vector_CallbackDescriptorPtr collection;
+    char __pad[168 - 0x18];
+};
+
+struct ClassDescriptor {
+    Descriptor descriptor;
+    MemberDescriptorContainer_PropertyDescriptor properties;
+    MemberDescriptorContainer_EventDescriptor events;
+    MemberDescriptorContainer_FunctionDescriptor functions;
+    MemberDescriptorContainer_YieldFunctionDescriptor yieldFunctions;
+    MemberDescriptorContainer_CallbackDescriptor callbacks;
+    void* _1;
+    void* _2;
+    unsigned _3 : 4;
+    unsigned isScriptable : 1;
+    char __pad[3];
+};
+
+struct Instance;
+
+struct msvc_weak_ptr_Instance
+{
+	Instance* object;
+	msvc_Ref_count_base* controlBlock;
+};
+
+struct msvc_shared_ptr_Instance
+{
+	Instance* object;
+	msvc_Ref_count_base* controlBlock;
+};
+
+struct msvc_vector_shared_ptr_Instance
+{
+    msvc_shared_ptr_Instance* first;
+    msvc_shared_ptr_Instance* last;
+    msvc_shared_ptr_Instance* limit;
+};
+
+struct msvc_shared_ptr_vector_shared_ptr_Instance
+{
+	msvc_vector_shared_ptr_Instance* object;
+	msvc_Ref_count_base* controlBlock;
+};
+
+struct Instance {
+	void* vftable;
+	msvc_weak_ptr_Instance self;
+	ClassDescriptor* descriptor;
+	char pad_20[88];
+	char* name;
+	msvc_shared_ptr_vector_shared_ptr_Instance children;
+	Instance* parent;
+};
+struct RobloxExtraSpace {
+	char pad_0[64];
+	Instance* scriptContext;
+};
+
+struct Context
+{
+    int identity;
+    void* _1;
+    void* _2;
+    struct lua_State* _3;
+    Capabilities capabilities;
+    void* capabilitiesGetter;
 };
