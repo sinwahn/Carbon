@@ -728,15 +728,17 @@ int carbon_setstack(lua_State* L)
 
 int carbon_getmaxstacksize(lua_State* L)
 {
-	lua_pushinteger(L, L->stacksize);
-	lua_pushinteger(L, L->size_ci);
+	lua_State* target = luaL_optthread(L, 1, L);
+	lua_pushinteger(L, target->stacksize);
+	lua_pushinteger(L, target->size_ci);
 	return 2;
 }
 
 int carbon_getstacksize(lua_State* L)
 {
-	lua_pushinteger(L, (int)(L->top - L->stack));
-	lua_pushinteger(L, (int)(L->end_ci - L->base_ci));
+	lua_State* target = luaL_optthread(L, 1, L);
+	lua_pushinteger(L, (int)(target->top - target->stack));
+	lua_pushinteger(L, (int)(target->end_ci - target->base_ci));
 	return 2;
 }
 

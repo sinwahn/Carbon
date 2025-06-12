@@ -741,12 +741,23 @@ export
 		luaL_typeerrorL(L, ud, tname); // else error
 	}
 
-	Table* luaL_checktable(lua_State* L, int narg)
+	bool luaL_checkboolean(lua_State* L, int narg) {
+		// This checks specifically for boolean values, ignoring
+		// all other truthy/falsy values. If the desired result
+		// is true if value is present then lua_toboolean should
+		// directly be used instead.
+		if (!lua_isboolean(L, narg))
+			tag_error(L, narg, LUA_TBOOLEAN);
+		return lua_toboolean(L, narg);
+	}
+
+	double luaL_checknumber(lua_State* L, int narg)
 	{
-		Table* table = lua_totable(L, narg);
-		if (!table)
-			tag_error(L, narg, LUA_TTABLE);
-		return table;
+		bool isnum;
+		double d = lua_tonumberx(L, narg, &isnum);
+		if (!isnum)
+			tag_error(L, narg, LUA_TNUMBER);
+		return d;
 	}
 
 	int luaL_checkinteger(lua_State* L, int narg)
@@ -758,23 +769,6 @@ export
 		return d;
 	}
 
-	bool luaL_checkboolean(lua_State* L, int narg) {
-		// This checks specifically for boolean values, ignoring
-		// all other truthy/falsy values. If the desired result
-		// is true if value is present then lua_toboolean should
-		// directly be used instead.
-		if (!lua_isboolean(L, narg))
-			tag_error(L, narg, LUA_TBOOLEAN);
-		return lua_toboolean(L, narg);
-	}
-
-	bool luaL_optboolean(lua_State* L, int narg, bool def)
-	{
-		if (lua_isnoneornil(L, narg))
-			return def;
-		return luaL_checkboolean(L, narg);
-	}
-
 	const char* luaL_checklstring(lua_State* L, int narg, size_t* len = nullptr)
 	{
 		const char* s = lua_tolstring(L, narg, len);
@@ -783,13 +777,27 @@ export
 		return s;
 	}
 
-	double luaL_checknumber(lua_State* L, int narg)
+	Table* luaL_checktable(lua_State* L, int narg)
 	{
-		bool isnum;
-		double d = lua_tonumberx(L, narg, &isnum);
-		if (!isnum)
-			tag_error(L, narg, LUA_TNUMBER);
-		return d;
+		Table* table = lua_totable(L, narg);
+		if (!table)
+			tag_error(L, narg, LUA_TTABLE);
+		return table;
+	}
+
+	lua_State* luaL_checkthread(lua_State* L, int narg)
+	{
+		lua_State* thread = lua_tothread(L, narg);
+		if (!thread)
+			tag_error(L, narg, LUA_TTABLE);
+		return thread;
+	}
+
+	bool luaL_optboolean(lua_State* L, int narg, bool def)
+	{
+		if (lua_isnoneornil(L, narg))
+			return def;
+		return luaL_checkboolean(L, narg);
 	}
 
 	const char* luaL_optlstring(lua_State* L, int narg, const char* def, size_t* len = nullptr)
@@ -810,6 +818,14 @@ export
 			return def;
 
 		return luaL_checkinteger(L, narg);
+	}
+
+	lua_State* luaL_optthread(lua_State* L, int narg, lua_State* def)
+	{
+		if (lua_isnoneornil(L, narg))
+			return def;
+
+		return luaL_checkthread(L, narg);
 	}
 
 	bool lua_iscfunction(lua_State* L, int idx)
