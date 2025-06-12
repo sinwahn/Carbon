@@ -53,19 +53,16 @@ SharedMemoryContentDeserialized sharedMemoryContent;
 
 void realMain()
 {
-	logger.log(riblixOffsets.print());
-
 	basicTryWrapper("realMain", [&]() {
 		try
 		{
-			hookHandler.getHook(HookId::lua_getfield).remove();
+			hookHandler.getHook(HookId::DispatchMessageW).remove();
 			globalState.init(ghModule, sharedMemoryContent.settingsPath, sharedMemoryContent.userDirectoryPath);
 
 			hookHandler.getHook(HookId::growCI)
 				.setTarget(luaApiAddresses.luaD_growCI)
 				.setHook(luaD_growCI_hook)
 				.setup();
-
 
 			hookHandler.getHook(HookId::FLOG1)
 				.setTarget(riblixAddresses.FLOG1)
@@ -83,21 +80,17 @@ void realMain()
 	});
 }
 
-bool mainThreadCreated = false;
-std::mutex mainInitMutex;
-
-int lua_getfield_Hook(lua_State* L, int idx, const char* k)
+LRESULT WINAPI DispatchMessageW_Hook(void* msg)
 {
-	std::scoped_lock lock(mainInitMutex);
-	if (!mainThreadCreated)
-	{
-		mainThreadCreated = true;
-		riblixOffsets.initialize(L);
-		std::thread customThread(realMain);
-		customThread.detach();
-	}
-	auto original = hookHandler.getHook(HookId::lua_getfield).getOriginal();
-	return reinterpret_cast<decltype(luaApiAddresses.lua_getfield)>(original)(L, idx, k);
+	static std::once_flag mainInitFlag;
+	std::call_once(mainInitFlag, [&]() {
+		std::thread mainThread(realMain);
+		mainThread.detach();
+	});
+
+	auto original = hookHandler.getHook(HookId::DispatchMessageW).getOriginal();
+	using DispatchMessageW_t = LRESULT(__stdcall*)(void*);
+	return reinterpret_cast<DispatchMessageW_t>(original)(msg);
 }
 
 SharedMemoryContentDeserialized deserializeSharedMemory()
@@ -227,28 +220,27 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 		ghModule = hModule;
 		SetUnhandledExceptionFilter(panic);
 
-		std::thread([hModule]() {
+		basicTryWrapper("DllMain", [&]() {
 
-			basicTryWrapper("DllMain", [&]() {
+			sharedMemoryContent = deserializeSharedMemory();
+			logger.initialize(sharedMemoryContent.logPath);
+			luaApiAddresses = sharedMemoryContent.offsets.luaApiAddresses;
+			riblixAddresses = sharedMemoryContent.offsets.riblixAddresses;
+			riblixOffsets = sharedMemoryContent.offsets.riblixOffsets;
 
-				sharedMemoryContent = deserializeSharedMemory();
-				logger.initialize(sharedMemoryContent.logPath);
-				luaApiAddresses = sharedMemoryContent.offsets.luaApiAddresses;
-				riblixAddresses = sharedMemoryContent.offsets.riblixAddresses;
-				riblixOffsets = sharedMemoryContent.offsets.riblixOffsets;
+			hookHandler.getHook(HookId::lua_newstate)
+				.setTarget(luaApiAddresses.lua_newstate)
+				.setHook(lua_newstate_hook)
+				.setup();
 
-				hookHandler.getHook(HookId::lua_getfield)
-					.setTarget(luaApiAddresses.lua_getfield)
-					.setHook(lua_getfield_Hook)
-					.setup();
+			HMODULE user32 = GetModuleHandleW(L"user32.dll");
+			FARPROC dispatchMessageW = GetProcAddress(user32, "DispatchMessageW");
+			hookHandler.getHook(HookId::DispatchMessageW)
+				.setTarget(dispatchMessageW)
+				.setHook(DispatchMessageW_Hook)
+				.setup();
+		});
 
-				hookHandler.getHook(HookId::lua_newstate)
-					.setTarget(luaApiAddresses.lua_newstate)
-					.setHook(lua_newstate_hook)
-					.setup();
-			});
-		
-		}).detach();
 		break;
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:

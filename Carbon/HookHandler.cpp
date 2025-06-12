@@ -48,9 +48,9 @@ bool Hook::remove()
 HookHandler::HookHandler()
 	: hooks({
 		{ "growCI" },
-		{ "lua_getfield" },
 		{ "FLOG1" },
 		{ "lua_newstate" },
+		{ "DispatchMessageW" },
 	})
 {
 	MH_Initialize();

@@ -9,6 +9,8 @@ import TaskList;
 import DataModelWatcher;
 import CarbonLuaApiLibs.dbglib;
 
+import RiblixStructureOffsets;
+
 GlobalStateInfo::GlobalStateInfo(lua_State* mainThread)
 	: mainThread(mainThread)
 {
@@ -17,6 +19,13 @@ GlobalStateInfo::GlobalStateInfo(lua_State* mainThread)
 
 DataModel* getAssociatedDataModel(const lua_State* L)
 {
+	if (!riblixOffsets.initialized)
+		if (riblixOffsets.initialize(L))
+		{
+			logger.log("offsets initialized", (uintptr_t)L);
+			logger.log(riblixOffsets.print());
+		}
+
 	if (auto extraSpace = L->userdata)
 		if (auto scriptContext = extraSpace->getScriptContext())
 			if (auto parent = scriptContext->getParent())
@@ -198,17 +207,9 @@ void GlobalStateWatcher::addState(lua_State* L)
 		return;
 	}
 
-	auto dataModel = getAssociatedDataModel(L);
-	auto info = std::make_shared<GlobalStateInfo>(L);
-	info->dataModel = dataModel;
-
-	auto emplaced = states.emplace(L, info);
-
-	if (!dataModel)
-	{
-		auto& info = emplaced.first->second;
-		taskListProcessor.add(FetchDataModelForStateTask(info));
-	}
+	auto stateInfo = std::make_shared<GlobalStateInfo>(L);
+	states.emplace(L, stateInfo);
+	taskListProcessor.add(FetchDataModelForStateTask(stateInfo));
 }
 
 GlobalStateWatcher::map_t::iterator GlobalStateWatcher::removeState(map_t::iterator pos)

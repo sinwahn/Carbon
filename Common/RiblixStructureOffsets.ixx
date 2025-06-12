@@ -41,9 +41,14 @@ export
 	{
 		bool initialized = false;
 
-		void initialize(const lua_State* state)
+		bool initialize(const lua_State* state)
 		{
+			if (!isValidAddress((uintptr_t)state))
+				return false;
+
 			auto extraSpace = state->userdata;
+			if (!extraSpace)
+				return false;
 
 			RobloxExtraSpace.findScriptContext(extraSpace);
 			auto scriptContext = tryDereference((uintptr_t)extraSpace, RobloxExtraSpace.scriptContext).value();
@@ -56,6 +61,7 @@ export
 			Instance.findChildren(dataModel);
 
 			initialized = true;
+			return true;
 		}
 
 		struct Descriptor

@@ -23,9 +23,9 @@ private:
 export enum class HookId
 {
 	growCI,
-	lua_getfield,
 	FLOG1,
 	lua_newstate,
+	DispatchMessageW,
 	_Size,
 };
 
