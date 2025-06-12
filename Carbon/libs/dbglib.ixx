@@ -448,13 +448,15 @@ void safePush(lua_State* L, StkId v)
 
 int carbon_dumpstacks(lua_State* L)
 {
+	lua_State* target = luaL_optthread(L, 1, L);
+
 	// save previous slots because we override them in this function
 	const int savedSlotsSize = 20;
 	StkId savedSlots[savedSlotsSize] = { nullptr };
 
-	int freeSlotsSize = int(L->stack_last + 1 - L->top);
+	int freeSlotsSize = int(target->stack_last + 1 - target->top);
 	int usedSavedSlotsSize = freeSlotsSize < savedSlotsSize ? freeSlotsSize : savedSlotsSize;
-	memcpy(&savedSlots, L->top, usedSavedSlotsSize * sizeof(StkId));
+	memcpy(&savedSlots, target->top, usedSavedSlotsSize * sizeof(StkId));
 
 	lua_createtable(L, 0, 4);
 
@@ -616,25 +618,25 @@ int carbon_dumpstacks(lua_State* L)
 
 	{
 		lua_pushstring(L, "ci");
-		pushCiStack(L->base_ci, L->ci + 1);
+		pushCiStack(target->base_ci, target->ci + 1);
 		lua_settable(L, -3);
 	}
 
 	{
 		lua_pushstring(L, "free_ci");
-		pushCiStack(L->ci + 1, L->end_ci);
+		pushCiStack(target->ci + 1, target->end_ci);
 		lua_settable(L, -3);
 	}
 
 	{
 		lua_pushstring(L, "stack");
-		pushStack(L->stack, L->top);
+		pushStack(target->stack, target->top);
 		lua_settable(L, -3);
 	}
 
 	{
 		lua_pushstring(L, "free_stack");
-		pushFreeStack(L->top, L->stack_last + 1);
+		pushFreeStack(target->top, target->stack_last + 1);
 		lua_settable(L, -3);
 	}
 
