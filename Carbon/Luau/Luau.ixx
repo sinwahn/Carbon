@@ -463,6 +463,30 @@ export
 		return 1;
 	}
 
+	int lightuserdatatag(const TValue* o) { return o->extra[0]; }
+
+	int luaO_rawequalObj(const TValue* t1, const TValue* t2)
+	{
+		if (ttype(t1) != ttype(t2))
+			return 0;
+		else
+			switch (ttype(t1))
+			{
+			case LUA_TNIL:
+				return 1;
+			case LUA_TNUMBER:
+				return nvalue(t1) == nvalue(t2);
+			case LUA_TVECTOR:
+				return luai_veceq(vvalue(t1), vvalue(t2));
+			case LUA_TBOOLEAN:
+				return bvalue(t1) == bvalue(t2); // boolean true must be 1 !!
+			case LUA_TLIGHTUSERDATA:
+				return pvalue(t1) == pvalue(t2) && lightuserdatatag(t1) == lightuserdatatag(t2);
+			default:
+				return gcvalue(t1) == gcvalue(t2);
+			}
+	}
+
 	const TValue* luaV_tonumber(const TValue* obj, TValue* n)
 	{
 		double num;
@@ -537,6 +561,13 @@ export
 				*isnum = 0;
 			return 0;
 		}
+	}
+
+	int lua_rawequal(lua_State* L, int index1, int index2)
+	{
+		StkId o1 = index2addr(L, index1);
+		StkId o2 = index2addr(L, index2);
+		return (o1 == luaO_nilobject() || o2 == luaO_nilobject()) ? 0 : luaO_rawequalObj(o1, o2);
 	}
 
 	const TValue* luaA_toobject(lua_State* L, int idx)
@@ -692,6 +723,24 @@ export
 		return func;
 	}
 
+	void* luaL_checkudata(lua_State* L, int ud, const char* tname)
+	{
+		void* p = lua_touserdata(L, ud);
+		if (p != nullptr)
+		{ // value is a userdata?
+			if (lua_getmetatable(L, ud))
+			{                                              // does it have a metatable?
+				lua_getfield(L, LUA_REGISTRYINDEX, tname); // get correct metatable
+				if (lua_rawequal(L, -1, -2))
+				{                  // does it have the correct mt?
+					lua_pop(L, 2); // remove both metatables
+					return p;
+				}
+			}
+		}
+		luaL_typeerrorL(L, ud, tname); // else error
+	}
+
 	Table* luaL_checktable(lua_State* L, int narg)
 	{
 		Table* table = lua_totable(L, narg);
@@ -732,6 +781,15 @@ export
 		if (!s)
 			tag_error(L, narg, LUA_TSTRING);
 		return s;
+	}
+
+	double luaL_checknumber(lua_State* L, int narg)
+	{
+		bool isnum;
+		double d = lua_tonumberx(L, narg, &isnum);
+		if (!isnum)
+			tag_error(L, narg, LUA_TNUMBER);
+		return d;
 	}
 
 	const char* luaL_optlstring(lua_State* L, int narg, const char* def, size_t* len = nullptr)
@@ -1042,6 +1100,15 @@ export
 
 		luaApiAddresses.lua_concat(L, 2);
 		luaD_throw(L, LUA_ERRRUN);
+	}
+
+	void luaL_register(lua_State* L, const luaL_Reg* l)
+	{
+		for (; l->name; l++)
+		{
+			lua_pushcclosure(L, l->func, l->name);
+			lua_setfield(L, -2, l->name);
+		}
 	}
 
 	using GCObjectVisitor = bool (*)(void* context, lua_Page* page, GCObject* gco);

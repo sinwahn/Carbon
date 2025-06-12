@@ -16,15 +16,6 @@ import RiblixStructures;
 import Logger;
 import SharedAddresses;
 
-void luaL_register(lua_State* L, const luaL_Reg* l)
-{
-	for (; l->name; l++)
-	{
-		lua_pushcclosure(L, l->func, l->name);
-		lua_setfield(L, -2, l->name);
-	}
-}
-
 void moveLibItems(lua_State* L, const char* libName, Table* env, Table* destination)
 {
 	lua_pushrawtable(L, env); // env
