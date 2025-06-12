@@ -7,7 +7,6 @@ import RiblixStructures;
 import Logger;
 import TaskList;
 import DataModelWatcher;
-import CarbonLuaApiLibs.dbglib;
 
 import RiblixStructureOffsets;
 
@@ -35,6 +34,13 @@ DataModel* getAssociatedDataModel(const lua_State* L)
 	return nullptr;
 }
 
+void GlobalStateInfo::saveOriginalEncodingState()
+{
+	originalPointerEncoding[0] = mainThread->global->ptrenckey[0];
+	originalPointerEncoding[1] = mainThread->global->ptrenckey[1];
+	originalPointerEncoding[2] = mainThread->global->ptrenckey[2];
+	originalPointerEncoding[3] = mainThread->global->ptrenckey[3];
+}
 
 FetchDataModelForStateTask::FetchDataModelForStateTask(std::weak_ptr<GlobalStateInfo> info)
 	: Task()
@@ -44,7 +50,6 @@ FetchDataModelForStateTask::FetchDataModelForStateTask(std::weak_ptr<GlobalState
 
 Task::ExecutionResult FetchDataModelForStateTask::execute()
 {
-	carbon_disablepointerencoding(info.lock()->mainThread);
 	if (info.expired())
 		return ExecutionResult::Fail;
 
@@ -56,6 +61,8 @@ Task::ExecutionResult FetchDataModelForStateTask::execute()
 	dataModelWatcher.onDataModelFetchedForState(dataModel);
 
 	taskListProcessor.add(std::move(FetchLuaVmInfoTask(info)));
+
+	info.lock()->saveOriginalEncodingState();
 
 	return ExecutionResult::Success;
 }
@@ -197,6 +204,11 @@ std::shared_ptr<GlobalStateInfo> GlobalStateWatcher::getStateByAddress(uintptr_t
 	return pos->second;
 }
 
+std::shared_ptr<GlobalStateInfo> GlobalStateWatcher::getStateFromGenericThread(lua_State* L)
+{
+	return getStateByAddress((uintptr_t)L->global->mainthread);
+}
+
 void GlobalStateWatcher::addState(lua_State* L)
 {
 	std::scoped_lock lock(mutex);
@@ -212,13 +224,13 @@ void GlobalStateWatcher::addState(lua_State* L)
 	taskListProcessor.add(FetchDataModelForStateTask(stateInfo));
 }
 
-GlobalStateWatcher::map_t::iterator GlobalStateWatcher::removeState(map_t::iterator pos)
+GlobalStateWatcher::stateMap_t::iterator GlobalStateWatcher::removeState(stateMap_t::iterator pos)
 {
 	std::scoped_lock lock(mutex);
 	return states.erase(pos);
 }
 
-GlobalStateWatcher::map_t::iterator GlobalStateWatcher::removeState(lua_State* L)
+GlobalStateWatcher::stateMap_t::iterator GlobalStateWatcher::removeState(lua_State* L)
 {
 	std::scoped_lock lock(mutex);
 	auto pos = states.find(L);

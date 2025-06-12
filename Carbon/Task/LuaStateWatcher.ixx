@@ -21,10 +21,14 @@ export struct GlobalStateInfo
 
 	GlobalStateInfo(lua_State* mainThread);
 
+	void saveOriginalEncodingState();
+
 	DataModel* dataModel = nullptr;
 	lua_State* const mainThread = nullptr;
 	lua_State* ourMainThread = nullptr;
 	bool environmentInjected = false;
+	uint64_t originalPointerEncoding[4] = {};
+
 	VmType vmType = VmType::Unknown;
 };
 
@@ -57,7 +61,7 @@ private:
 export class GlobalStateWatcher
 {
 public:
-	using map_t = std::map<lua_State*, std::shared_ptr<GlobalStateInfo>>;
+	using stateMap_t = std::map<lua_State*, std::shared_ptr<GlobalStateInfo>>;
 
 	GlobalStateWatcher();
 
@@ -66,13 +70,14 @@ public:
 	void onGlobalStateRemoving(lua_State* L);
 	std::vector<std::shared_ptr<GlobalStateInfo>> getAssociatedStates(const DataModel* with);
 	std::shared_ptr<GlobalStateInfo> getStateByAddress(uintptr_t address);
+	std::shared_ptr<GlobalStateInfo> getStateFromGenericThread(lua_State* L);
 
 private:
 	void addState(lua_State* L);
-	map_t::iterator removeState(map_t::iterator pos);
-	map_t::iterator removeState(lua_State* L);
+	stateMap_t::iterator removeState(stateMap_t::iterator pos);
+	stateMap_t::iterator removeState(lua_State* L);
 	void removeAssociatedStates(const DataModel* with);
 
-	map_t states;
+	stateMap_t states;
 	std::recursive_mutex mutex;
 };

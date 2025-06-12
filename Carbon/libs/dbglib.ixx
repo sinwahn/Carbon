@@ -8,32 +8,39 @@ import Luau.Riblix;
 import RiblixStructures;
 import StringUtils;
 import Formatter;
+import DataModelWatcher;
 
-export int carbon_disablepointerencoding(lua_State* L);
+int carbon_disablepointerencoding(lua_State* L);
+int carbon_restorepointerencoding(lua_State* L);
+
 int carbon_getdescriptors(lua_State* L);
 int carbon_getdescriptorinfo(lua_State* L);
+
+int carbon_getinstancebrigdemap(lua_State* L);
+int carbon_setscriptable(lua_State* L);
+int carbon_getmainthread(lua_State* L);
+
 int carbon_getscriptcontext(lua_State* L);
 int carbon_getcfunction(lua_State* L);
+int carbon_getgcaddr(lua_State* L);
 int carbon_repush(lua_State* L);
 int carbon_gettt(lua_State* L);
-int carbon_getgcaddr(lua_State* L);
+
+int carbon_debugbreak(lua_State* L);
+int carbon_dumpstacks(lua_State* L);
 int carbon_torva(lua_State* L);
 int carbon_getcontext(lua_State* L);
 
-int carbon_getinstancebrigdemap(lua_State* L);
-
-int carbon_dumpstacks(lua_State* L);
-int carbon_debugbreak(lua_State* L);
-
-int carbon_setscriptable(lua_State* L);
-
 export const luaL_Reg debug_library[] = {
 	{"disablepointerencoding", carbon_disablepointerencoding},
+	{"restorepointerencoding", carbon_restorepointerencoding},
+
 	{"getdescriptors", carbon_getdescriptors},
 	{"getdescriptorinfo", carbon_getdescriptorinfo},
-	{"dumpstacks", carbon_dumpstacks},
-	{"torva", carbon_torva},
-	{"getcontext", carbon_getcontext},
+
+	{"getinstancebrigdemap", carbon_getinstancebrigdemap},
+	{"setscriptable", carbon_setscriptable},
+	{"getmainthread", carbon_getmainthread},
 
 	{"getscriptcontext", carbon_getscriptcontext},
 	{"getcfunction", carbon_getcfunction},
@@ -41,10 +48,10 @@ export const luaL_Reg debug_library[] = {
 	{"repush", carbon_repush},
 	{"gettt", carbon_gettt},
 
-	{"getinstancebrigdemap", carbon_getinstancebrigdemap},
-
-	{"setscriptable", carbon_setscriptable},
 	{"debugbreak", carbon_debugbreak},
+	{"dumpstacks", carbon_dumpstacks},
+	{"torva", carbon_torva},
+	{"getcontext", carbon_getcontext},
 
 	{nullptr, nullptr},
 };
@@ -58,9 +65,34 @@ int carbon_disablepointerencoding(lua_State* L)
 	return 0;
 }
 
+int carbon_restorepointerencoding(lua_State* L)
+{
+	auto state = dataModelWatcher.stateWatcher.getStateFromGenericThread(L);
+	if (!state)
+	{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "unable to find associated global state from current thread");
+		return 2;
+	}
+
+	L->global->ptrenckey[0] = state->originalPointerEncoding[0];
+	L->global->ptrenckey[1] = state->originalPointerEncoding[1];
+	L->global->ptrenckey[2] = state->originalPointerEncoding[2];
+	L->global->ptrenckey[3] = state->originalPointerEncoding[3];
+
+	lua_pushboolean(L, true);
+	return 1;
+}
+
 int carbon_getinstancebrigdemap(lua_State* L)
 {
 	push_instanceBridgeMap(L);
+	return 1;
+}
+
+int carbon_getmainthread(lua_State* L)
+{
+	lua_pushrawthread(L, L->global->mainthread);
 	return 1;
 }
 
