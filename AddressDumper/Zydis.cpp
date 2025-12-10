@@ -9,10 +9,9 @@ ZyanStatus DisassembleInstruction(ZyanU64 runtime_address,
 		return ZYAN_STATUS_INVALID_ARGUMENT;
 	}
 
-	*instruction = (ZydisDisassembledInstruction)
-	{
-	  .runtime_address = runtime_address
-	};
+	ZydisDisassembledInstruction instr;
+	instruction = &instr;
+	instruction->runtime_address = runtime_address;
 
 	ZydisDecoder decoder;
 	ZYAN_CHECK(ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64));
@@ -44,10 +43,9 @@ ZyanStatus DisassembleInstructionWithText(ZyanU64 runtime_address,
 		return ZYAN_STATUS_INVALID_ARGUMENT;
 	}
 
-	*instruction = (ZydisDisassembledInstruction)
-	{
-	  .runtime_address = runtime_address
-	};
+	ZydisDisassembledInstruction instr;
+	instruction = &instr;
+	instruction->runtime_address = runtime_address;
 
 	ZydisDecoder decoder;
 	ZYAN_CHECK(ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64));
