@@ -38,10 +38,7 @@ export const luaL_Reg filesystemLibrary[] = {
 
 std::wstring getPath(lua_State* L)
 {
-	size_t size;
-	auto cstring = luaL_checklstring(L, 1, &size);
-
-	std::string path = std::string(cstring, size);
+	std::string path = luaL_checkstdstring(L, 1);
 	std::replace(path.begin(), path.end(), '/', '\\');
 
 	if (path.find("..") != std::string::npos)
@@ -107,15 +104,14 @@ int carbon_writefile(lua_State* L)
 {
 	auto path = getPath(L);
 
-	size_t contentSize;
-	auto contentCString = luaL_checklstring(L, 2, &contentSize);
+	auto content = luaL_checkstdstringview(L, 2);
 
 	if (!isExtensionAllowed(path))
 		luaL_errorL(L, "forbidden extension");
 
 	std::ofstream out;
 	out.open(path, std::ios::out | std::ios::binary);
-	out.write(contentCString, contentSize);
+	out.write(content);
 	out.close();
 
 	return 0;
@@ -181,8 +177,7 @@ int carbon_appendfile(lua_State* L)
 {
 	auto path = getPath(L);
 
-	size_t contentSize;
-	auto contentCString = luaL_checklstring(L, 2, &contentSize);
+	auto content = luaL_checkstdstringview(L, 2);
 
 	if (!isExtensionAllowed(path))
 		luaL_errorL(L, "forbidden extension");
@@ -192,7 +187,7 @@ int carbon_appendfile(lua_State* L)
 
 	std::ofstream out;
 	out.open(path, std::ios_base::app | std::ios_base::binary);
-	out.write(contentCString, contentSize);
+	out.write(content);
 	out.close();
 
 	return 0;

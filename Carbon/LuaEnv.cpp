@@ -119,12 +119,7 @@ void LuaApiRuntimeState::injectEnvironment(std::shared_ptr<GlobalStateInfo> info
 
 		// debug
 		{
-			lua_createtable(L);
-			Table* debug = lua_totable(L, -1);
-			lua_pushvalue(L, -1);
-			lua_setfield(L, -3, "debug");
-
-			luaL_register(L, closureDebugLibrary);
+			auto debug = luaL_register(L, closureDebugLibrary, "debug");
 
 			moveLibItems(L, "debug", renv, debug);
 
@@ -159,10 +154,10 @@ void LuaApiRuntimeState::runScript(std::shared_ptr<GlobalStateInfo> info, const 
 	lua_pop(L, 1);
 
 	if (luaApiRuntimeState.apiSettings->set_max_initial_identity)
-		L->userdata->identity = 7;
+		L->userdata->getIdentity() = 7;
 
 	if (luaApiRuntimeState.apiSettings->set_max_initial_capabilities)
-		L->userdata->capabilities.set(Capabilities::All);
+		L->userdata->getCapabilities().set(Capabilities::All);
 
 	createRedirectionProxy(L, env, genv);
 	L->gt = env;

@@ -5,7 +5,7 @@ import TaskList;
 import Logger;
 import GlobalState;
 
-DataModelInfo::DataModelInfo(DataModel* dataModel)
+DataModelInfo::DataModelInfo(Instance* dataModel)
 	: dataModel(dataModel)
 {
 }
@@ -19,7 +19,7 @@ void DataModelInfo::setDataModel(DataModelType _type)
 	}
 }
 
-DataModelType getDataModelType(const DataModel* dataModel)
+DataModelType getDataModelType(const Instance* dataModel)
 {
 	if (dataModel->getChildren().get()->empty())
 		return DataModelType::Invalid;
@@ -127,7 +127,8 @@ void DataModelWatcher::onDataModelClosing(DataModel* dataModel)
 {
 	logger.log("closing DM", dataModel);
 	stateWatcher.onDataModelClosing(dataModel);
-	removeDataModel(dataModel);
+	// TODO: :adam:	
+	removeDataModel(reinterpret_cast<Instance*>(dataModel));
 }
 
 void DataModelWatcher::onDataModelInfoSet(DataModelInfo* info)
@@ -135,7 +136,7 @@ void DataModelWatcher::onDataModelInfoSet(DataModelInfo* info)
 	taskListProcessor.replace(AvailableLuaStateReportTask());
 }
 
-void DataModelWatcher::onDataModelFetchedForState(DataModel* dataModel)
+void DataModelWatcher::onDataModelFetchedForState(Instance* dataModel)
 {
 	if (tryAddDataModel(dataModel))
 		logger.log("added new DM from fetch", dataModel);
@@ -148,7 +149,7 @@ std::shared_ptr<GlobalStateInfo> DataModelWatcher::getStateByAddress(uintptr_t a
 	return stateWatcher.getStateByAddress(address);
 }
 
-void DataModelWatcher::addDataModel(DataModel* dataModel)
+void DataModelWatcher::addDataModel(Instance* dataModel)
 {
 	logger.log("added DM", dataModel);
 
@@ -161,7 +162,7 @@ void DataModelWatcher::addDataModel(DataModel* dataModel)
 		taskListProcessor.add(FetchDataModelInfoTask(info));
 }
 
-bool DataModelWatcher::tryAddDataModel(DataModel* dataModel)
+bool DataModelWatcher::tryAddDataModel(Instance* dataModel)
 {
 	std::scoped_lock lock(mutex);
 	if (dataModels.contains(dataModel))
@@ -171,7 +172,7 @@ bool DataModelWatcher::tryAddDataModel(DataModel* dataModel)
 	return true;
 }
 
-void DataModelWatcher::removeDataModel(DataModel* dataModel)
+void DataModelWatcher::removeDataModel(Instance* dataModel)
 {
 	std::scoped_lock lock(mutex);
 	taskListProcessor.remove(FetchDataModelInfoTask(dataModels[dataModel]));

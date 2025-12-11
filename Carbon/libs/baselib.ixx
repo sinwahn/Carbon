@@ -200,12 +200,12 @@ int carbon_setcapability(lua_State* L)
 	bool doSet = luaL_optboolean(L, 2, true);
 	if (doSet)
 	{
-		L->userdata->capabilities.set(nameToCapability(name));
+		L->userdata->getCapabilities().set(nameToCapability(name));
 		getCurrentContext()->capabilities.set(nameToCapability(name));
 	}
 	else
 	{
-		L->userdata->capabilities.clear(nameToCapability(name));
+		L->userdata->getCapabilities().clear(nameToCapability(name));
 		getCurrentContext()->capabilities.clear(nameToCapability(name));
 	}
 
@@ -223,7 +223,7 @@ int carbon_hascapability(lua_State* L)
 // TODO: switch away from capabilities
 int carbon_checkcaller(lua_State* L)
 {
-	lua_pushboolean(L, L->userdata->capabilities.isSet(Capabilities::OurThread));
+	lua_pushboolean(L, L->userdata->getCapabilities().isSet(Capabilities::OurThread));
 	return 1;
 }
 
@@ -232,7 +232,7 @@ int carbon_isourthread(lua_State* L)
 {
 	int argbase = 0;
 	auto target = getthread(L, argbase);
-	lua_pushboolean(L, target->userdata->capabilities.isSet(Capabilities::OurThread));
+	lua_pushboolean(L, target->userdata->getCapabilities().isSet(Capabilities::OurThread));
 	return 1;
 }
 
@@ -244,9 +244,9 @@ int carbon_setourthread(lua_State* L)
 
 	bool isOur = luaL_checkboolean(L, argbase + 1);
 	if (isOur)
-		target->userdata->capabilities.set(Capabilities::OurThread);
+		target->userdata->getCapabilities().set(Capabilities::OurThread);
 	else
-		target->userdata->capabilities.clear(Capabilities::OurThread);
+		target->userdata->getCapabilities().clear(Capabilities::OurThread);
 
 	return 0;
 }
@@ -256,7 +256,7 @@ int carbon_setidentity(lua_State* L)
 	int argbase = 0;
 	auto target = getthread(L, argbase);
 	int identity = luaL_checkinteger(L, argbase + 1);
-	target->userdata->identity = identity;
+	target->userdata->getIdentity() = identity;
 	if (target == L)
 		getCurrentContext()->identity = identity;
 	return 0;
@@ -266,7 +266,7 @@ int carbon_getidentity(lua_State* L)
 {
 	int argbase = 0;
 	auto target = getthread(L, argbase);
-	lua_pushinteger(L, target->userdata->identity);
+	lua_pushinteger(L, target->userdata->getIdentity());
 	return 1;
 }
 
@@ -274,7 +274,7 @@ int carbon_getidentity(lua_State* L)
 int carbon_getcallingscript(lua_State* L)
 {
 	auto extraSpace = L->userdata;
-	if (auto script = extraSpace->script)
+	if (auto script = extraSpace->getScript())
 		InstanceBridge_pushshared(L, script->getSelf().lock());
 	else
 		lua_pushnil(L);
@@ -373,8 +373,7 @@ int carbon_cloneref(lua_State* L)
 
 int carbon_loadstring(lua_State* L)
 {
-	size_t length = 0;
-	const char* source = luaL_checklstring(L, 1, &length);
+	const char* source = luaL_checklstring(L, 1);
 	const char* chunkname = luaL_optlstring(L, 2, "COAL");
 
 	if (luaApiRuntimeState.compile(L, source, chunkname))

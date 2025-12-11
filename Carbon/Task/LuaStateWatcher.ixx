@@ -23,7 +23,7 @@ export struct GlobalStateInfo
 
 	void saveOriginalEncodingState();
 
-	DataModel* dataModel = nullptr;
+	Instance* dataModel = nullptr;
 	lua_State* const mainThread = nullptr;
 	lua_State* ourMainThread = nullptr;
 	bool environmentInjected = false;
@@ -68,7 +68,7 @@ public:
 	void onDataModelClosing(DataModel* dataModel);
 	void onGlobalStateCreated(lua_State* L);
 	void onGlobalStateRemoving(lua_State* L);
-	std::vector<std::shared_ptr<GlobalStateInfo>> getAssociatedStates(const DataModel* with);
+	std::vector<std::shared_ptr<GlobalStateInfo>> getAssociatedStates(const Instance* with);
 	std::shared_ptr<GlobalStateInfo> getStateByAddress(uintptr_t address);
 	std::shared_ptr<GlobalStateInfo> getStateFromGenericThread(lua_State* L);
 

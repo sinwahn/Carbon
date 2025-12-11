@@ -234,7 +234,7 @@ int carbon_filtergc(lua_State* L)
 {
 	lua_Type searchType;
 
-	auto typeName = std::string_view(luaL_checklstring(L, 1));
+	auto typeName = luaL_checkstdstringview(L, 1);
 	auto options = lua_totable(L, 2);
 	auto returnOne = luaL_optboolean(L, 3, false);
 

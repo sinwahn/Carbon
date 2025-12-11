@@ -42,6 +42,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarbonGui", "CarbonGui\Carb
 		{AD8FF974-80B3-448B-83F1-91E8E402DF5C} = {AD8FF974-80B3-448B-83F1-91E8E402DF5C}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Common\Utils\Common.ixx = Common\Utils\Common.ixx
+		Common\Utils\Traits.ixx = Common\Utils\Traits.ixx
+		Common\Utils\UnorderedMap.ixx = Common\Utils\UnorderedMap.ixx
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Kernel|Any CPU = Debug Kernel|Any CPU
@@ -379,6 +386,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {78F450CD-C790-4C80-8667-FBF3E05DEABC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {851AEECD-EDB5-4D8C-A7C3-158AD2183F71}

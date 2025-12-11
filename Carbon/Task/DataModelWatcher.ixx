@@ -19,13 +19,13 @@ enum class DataModelType
 export class DataModelInfo
 {
 public:
-	DataModelInfo(DataModel* dataModel);
+	DataModelInfo(Instance* dataModel);
 
 	void setDataModel(DataModelType type);
 	bool tryFetchInfo();
 
 	DataModelType type = DataModelType::Invalid;
-	DataModel* dataModel = nullptr;
+	Instance* dataModel = nullptr;
 	class DataModelWatcher* watcher;
 
 };
@@ -63,17 +63,17 @@ public:
 
 	void onDataModelClosing(DataModel* dataModel);
 	void onDataModelInfoSet(DataModelInfo* info);
-	void onDataModelFetchedForState(DataModel* dataModel);
+	void onDataModelFetchedForState(Instance* dataModel);
 
 	std::shared_ptr<GlobalStateInfo> getStateByAddress(uintptr_t address);
 	GlobalStateWatcher stateWatcher;
 	std::recursive_mutex& getMutex() { return mutex; };
 private:
-	void addDataModel(DataModel* dataModel);
-	bool tryAddDataModel(DataModel* dataModel);
-	void removeDataModel(DataModel* dataModel);
+	void addDataModel(Instance* dataModel);
+	bool tryAddDataModel(Instance* dataModel);
+	void removeDataModel(Instance* dataModel);
 
-	std::map<DataModel*, std::shared_ptr<DataModelInfo>> dataModels;
+	std::map<Instance*, std::shared_ptr<DataModelInfo>> dataModels;
 	std::recursive_mutex mutex;
 };
 

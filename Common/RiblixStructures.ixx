@@ -301,6 +301,7 @@ export
 		}
 	};
 
+	// TODO: broken, make offset finder too
 	struct ClassDescriptor : public Descriptor
 	{
 		MemberDescriptorContainer<PropertyDescriptor> properties;
@@ -527,23 +528,36 @@ export
 		void* _4;
 		void* ref_count_shared;
 		void* _5;
-		int identity;
+		int _identity;
 		int _6;
 		void* _7;
 
 		Instance* _scriptContext;
-		Capabilities capabilities;
-		uint32_t _8;
-		Instance* script;
+		Capabilities _capabilities;
+		Instance* _script;
+		Instance* _actor;
+
 		//void* ref_count_script;
+
+		int& getIdentity() {
+			return *(int*)(getAddress(riblixOffsets.RobloxExtraSpace.identity));
+		}
 
 		Instance* getScriptContext() {
 			return *(Instance**)(getAddress(riblixOffsets.RobloxExtraSpace.scriptContext));
 		}
 
-		//Instance* getScript() {
-		//	return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.script));
-		//}
+		Instance* getScript() {
+			return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.script));
+		}
+
+		Instance* getActor() {
+			return (Instance*)(getAddress(riblixOffsets.RobloxExtraSpace.actor));
+		}
+
+		Capabilities& getCapabilities() {
+			return *(Capabilities*)(getAddress(riblixOffsets.RobloxExtraSpace.capabilities));
+		}
 	};
 
 	struct Context
@@ -563,27 +577,5 @@ export
 		size_t _2;
 	};
 
-	using DataModel = Instance;
-
-	// TODO: insanely unreliable
-	struct DataModel_
-	{
-		Instance* toInstance()
-		{
-			auto address = (uintptr_t)this + 0x190;
-			return (Instance*)address;
-		}
-
-		const Instance* toInstance() const
-		{
-			auto address = (uintptr_t)this + 0x190;
-			return (Instance*)address;
-		}
-
-		static DataModel* toDataModel(Instance* self)
-		{
-			auto address = (uintptr_t)self - 0x190;
-			return (DataModel*)address;
-		}
-	};
+	struct DataModel {};
 }

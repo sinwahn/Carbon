@@ -16,7 +16,7 @@ GlobalStateInfo::GlobalStateInfo(lua_State* mainThread)
 
 }
 
-DataModel* getAssociatedDataModel(const lua_State* L)
+Instance* getAssociatedDataModel(const lua_State* L)
 {
 	if (!riblixOffsets.initialized)
 		if (riblixOffsets.initialize(L))
@@ -112,7 +112,7 @@ vmStatesStats getVmStats(lua_State* L)
 		case LUA_TTHREAD:
 			if (gco->th.userdata)
 			{
-				context->stats.identitiesCount[gco->th.userdata->identity]++;
+				context->stats.identitiesCount[gco->th.userdata->getIdentity()]++;
 				context->stats.statesCount++;
 			}
 			break;
@@ -183,7 +183,7 @@ void GlobalStateWatcher::onGlobalStateRemoving(lua_State* L)
 	taskListProcessor.add(std::move(AvailableLuaStateReportTask()));
 }
 
-std::vector<std::shared_ptr<GlobalStateInfo>> GlobalStateWatcher::getAssociatedStates(const DataModel* with)
+std::vector<std::shared_ptr<GlobalStateInfo>> GlobalStateWatcher::getAssociatedStates(const Instance* with)
 {
 	std::scoped_lock lock(mutex);
 	std::vector<std::shared_ptr<GlobalStateInfo>>result;
@@ -249,7 +249,12 @@ void GlobalStateWatcher::removeAssociatedStates(const DataModel* with)
 	auto iter = states.begin();
 	while (iter != states.end())
 	{
-		if (iter->second->dataModel == with)
+		// TODO: extract to function
+		auto withp = (uintptr_t)with;
+		auto registeredp = (uintptr_t)iter->second->dataModel;
+		auto offset = withp > registeredp ? withp - registeredp : registeredp - withp;
+		
+		if (offset < 0x500)
 		{
 			onGlobalStateRemoving(iter->first);
 			iter = removeState(iter);
