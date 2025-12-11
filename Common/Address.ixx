@@ -88,4 +88,12 @@ export
 		uintptr_t value = 0;
 	};
 
+	namespace std {
+		template <>
+		struct hash<Address> {
+			std::size_t operator()(const Address& of) const noexcept {
+				return std::hash<uintptr_t>()(of.value);
+			}
+		};
+	}
 }
