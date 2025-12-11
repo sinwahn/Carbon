@@ -413,6 +413,14 @@ export
 		*obj1 = *obj2;
 		obj1->tt = obj2->tt;
 	}
+	
+	void lua_remove(lua_State* L, int idx)
+	{
+		StkId p = index2addr(L, idx);
+		while (++p < L->top)
+			setobj(p - 1, p);
+		L->top--;
+	}
 
 	void lua_insert(lua_State* L, int idx)
 	{
@@ -777,6 +785,20 @@ export
 		return s;
 	}
 
+	export std::string luaL_checkstdstring(lua_State* L, int index)
+	{
+		size_t stringSize = 0;
+		const char* data = luaL_checklstring(L, index, &stringSize);
+		return std::string(data, stringSize);
+	}
+
+	export std::string_view luaL_checkstdstringview(lua_State* L, int index)
+	{
+		size_t stringSize = 0;
+		const char* data = luaL_checklstring(L, index, &stringSize);
+		return std::string_view(data, stringSize);
+	}
+
 	Table* luaL_checktable(lua_State* L, int narg)
 	{
 		Table* table = lua_totable(L, narg);
@@ -1118,13 +1140,26 @@ export
 		luaD_throw(L, LUA_ERRRUN);
 	}
 
-	void luaL_register(lua_State* L, const luaL_Reg* l)
+	// returns created library table if name was provided
+	Table* luaL_register(lua_State* L, const luaL_Reg* l, const char* name = nullptr)
 	{
+		Table* result = nullptr;
+
+		if (name)
+		{
+			lua_createtable(L);
+			Table* debug = lua_totable(L, -1);
+			lua_pushvalue(L, -1);
+			lua_setfield(L, -3, name);
+		}
+
 		for (; l->name; l++)
 		{
 			lua_pushcclosure(L, l->func, l->name);
 			lua_setfield(L, -2, l->name);
 		}
+
+		return result;
 	}
 
 	using GCObjectVisitor = bool (*)(void* context, lua_Page* page, GCObject* gco);
