@@ -7,9 +7,35 @@
     <ClCompile Include="..\Common\StringUtils.ixx" />
     <ClCompile Include="AddressDumper.cpp" />
     <ClCompile Include="Memory.ixx" />
-    <ClCompile Include="Zydis.c" />
+    <ClCompile Include="Zydis.cpp" />
+    <ClCompile Include="Lua\Address.ixx" />
+    <ClCompile Include="..\Common\InputFile.ixx" />
+    <ClCompile Include="Lua\Bridge.ixx" />
+    <ClCompile Include="Lua\BaseLib.ixx" />
+    <ClCompile Include="Lua\ByteArray.ixx" />
+    <ClCompile Include="Api.ixx" />
+    <ClCompile Include="Lua\FunctionData.ixx" />
+    <ClCompile Include="Lua\Section.ixx" />
+    <ClCompile Include="Lua\DumpInfo.ixx" />
+    <ClCompile Include="DumpInfo.ixx" />
+    <ClCompile Include="..\Common\Utils\Common.ixx" />
+    <ClCompile Include="..\Common\Utils\Traits.ixx" />
+    <ClCompile Include="..\Common\Utils\UnorderedMap.ixx" />
+    <ClCompile Include="Lua\Registrar.ixx" />
+    <ClCompile Include="Lua\ApplicationSections.ixx" />
+    <ClCompile Include="ApplicationSections.ixx" />
+    <ClCompile Include="Section.ixx" />
+    <ClCompile Include="FunctionCallAnalyzer.ixx" />
+    <ClCompile Include="Disassembler.ixx" />
+    <ClCompile Include="Temp.ixx" />
+    <ClCompile Include="Api.cpp" />
+    <ClCompile Include="LuaLib.ixx" />
+    <ClCompile Include="Lua\LuaLibRef.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zydis.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Dumper.lua" />
   </ItemGroup>
 </Project>

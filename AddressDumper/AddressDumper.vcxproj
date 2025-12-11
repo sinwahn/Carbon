@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -149,16 +149,19 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\man\source\repos\Coal\dependencies\luau\Common\include;C:\Users\man\source\repos\Coal\dependencies\luau\Ast\include;C:\Users\man\source\repos\Coal\dependencies\luau\VM\include;C:\Users\man\source\repos\Coal\dependencies\luau\Compiler\include;../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TreatWarningAsError>true</TreatWarningAsError>
       <BuildStlModules>false</BuildStlModules>
       <EnableModules>false</EnableModules>
+      <ModuleOutputFile>$(IntDir)%(RelativeDir)</ModuleOutputFile>
+      <ModuleDependenciesFile>$(IntDir)%(RelativeDir)</ModuleDependenciesFile>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\zydis\msvc\bin\DebugX64\Zydis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\zydis\msvc\bin\DebugX64\Zydis.lib;..\dependencies\luau\out\build\x64-debug\Luau.Compiler.lib;..\dependencies\luau\out\build\x64-debug\Luau.VM.lib;..\dependencies\luau\out\build\x64-debug\Luau.Ast.lib;..\dependencies\luau\out\build\x64-debug\Luau.Common.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,20 +173,24 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\dependencies\luau\Common\include;..\dependencies\luau\Ast\include;..\dependencies\luau\VM\include;..\dependencies\luau\Compiler\include;../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TreatWarningAsError>true</TreatWarningAsError>
       <BuildStlModules>false</BuildStlModules>
       <EnableModules>false</EnableModules>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ModuleOutputFile>$(IntDir)%(RelativeDir)</ModuleOutputFile>
+      <ModuleDependenciesFile>$(IntDir)%(RelativeDir)</ModuleDependenciesFile>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\zydis\msvc\bin\ReleaseX64\Zydis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\zydis\msvc\bin\ReleaseX64\Zydis.lib;..\dependencies\luau\out\build\x64-release\Luau.Compiler.lib;
+..\dependencies\luau\out\build\x64-release\Luau.VM.lib;..\dependencies\luau\out\build\x64-release\Luau.Ast.lib;..\dependencies\luau\out\build\x64-release\Luau.Common.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release O0|x64'">
@@ -195,7 +202,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\man\source\repos\Coal\dependencies\luau\Common\include;C:\Users\man\source\repos\Coal\dependencies\luau\Ast\include;C:\Users\man\source\repos\Coal\dependencies\luau\VM\include;C:\Users\man\source\repos\Coal\dependencies\luau\Compiler\include;../zydis/include;../zydis/dependencies/zycore/include;../zydis/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TreatWarningAsError>true</TreatWarningAsError>
       <BuildStlModules>false</BuildStlModules>
@@ -203,26 +210,65 @@
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
+      <ModuleOutputFile>$(IntDir)%(RelativeDir)</ModuleOutputFile>
+      <ModuleDependenciesFile>$(IntDir)%(RelativeDir)</ModuleDependenciesFile>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\zydis\msvc\bin\ReleaseX64\Zydis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\zydis\msvc\bin\ReleaseX64\Zydis.lib;..\dependencies\luau\out\build\x64-release\Luau.Compiler.lib;
+..\dependencies\luau\out\build\x64-release\Luau.VM.lib;..\dependencies\luau\out\build\x64-release\Luau.Ast.lib;..\dependencies\luau\out\build\x64-release\Luau.Common.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\Address.ixx" />
     <ClCompile Include="..\Common\ExceptionBase.ixx" />
     <ClCompile Include="..\Common\Formatter.ixx" />
+    <ClCompile Include="..\Common\InputFile.ixx" />
     <ClCompile Include="..\Common\StringUtils.ixx" />
+    <ClCompile Include="..\Common\Utils\Common.ixx" />
+    <ClCompile Include="..\Common\Utils\Traits.ixx" />
+    <ClCompile Include="..\Common\Utils\UnorderedMap.ixx" />
     <ClCompile Include="AddressDumper.cpp" />
+    <ClCompile Include="Api.cpp" />
+    <ClCompile Include="Disassembler.ixx" />
+    <ClCompile Include="FunctionCallAnalyzer.ixx" />
+    <ClCompile Include="Lua\Address.ixx" />
+    <ClCompile Include="Api.ixx" />
+    <ClCompile Include="Lua\ApplicationSections.ixx" />
+    <ClCompile Include="Lua\BaseLib.ixx" />
+    <ClCompile Include="Lua\Bridge.ixx" />
+    <ClCompile Include="Lua\ByteArray.ixx" />
+    <ClCompile Include="Lua\DumpInfo.ixx" />
+    <ClCompile Include="Lua\FunctionData.ixx" />
+    <ClCompile Include="ApplicationSections.ixx" />
+    <ClCompile Include="LuaLib.ixx" />
+    <ClCompile Include="Lua\LuaLibRef.ixx" />
+    <ClCompile Include="Lua\Registrar.ixx" />
+    <ClCompile Include="Lua\Section.ixx" />
     <ClCompile Include="Memory.ixx" />
-    <ClCompile Include="Zydis.c" />
+    <ClCompile Include="DumpInfo.ixx" />
+    <ClCompile Include="Section.ixx" />
+    <ClCompile Include="Temp.ixx" />
+    <ClCompile Include="Zydis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Zydis.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Dumper.lua">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Script</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release O0|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent>false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release O0|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
