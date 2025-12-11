@@ -37,6 +37,9 @@ auto pointerToRttiNamedBySubstring = [](std::string_view pattern) -> offsetPredi
 
 export
 {
+	// TODO: search should mark known field and check unknown with alignment in mind
+	// TODO: ABI print should be versatile
+
 	struct RiblixOffsets
 	{
 		bool initialized = false;
@@ -51,6 +54,13 @@ export
 				return false;
 
 			RobloxExtraSpace.findScriptContext(extraSpace);
+			RobloxExtraSpace.findNext(extraSpace);
+			RobloxExtraSpace.findIdentity(extraSpace);
+
+			RobloxExtraSpace.findCapabilities(extraSpace);
+			RobloxExtraSpace.findScript(extraSpace);
+			RobloxExtraSpace.findActor(extraSpace);
+
 			auto scriptContext = tryDereference((uintptr_t)extraSpace, RobloxExtraSpace.scriptContext).value();
 
 			Instance.findParent(scriptContext);
@@ -162,22 +172,112 @@ export
 
 		struct : Descriptor
 		{
+			int shared = kInvalidOffset;
+			int next = kInvalidOffset;
+
+			int identity = kInvalidOffset;
+
 			int scriptContext = kInvalidOffset;
+			int capabilities = kInvalidOffset;
+			int script = kInvalidOffset;
+			int actor = kInvalidOffset;
+
+
+			void findIdentity(const struct RobloxExtraSpace* object)
+			{
+				identity = 6*8;
+			}
 
 			// find with msvc rtti
-			void findScriptContext(const struct RobloxExtraSpace* object)
+			void findShared(const struct RobloxExtraSpace* object)
 			{
-				scriptContext = offsetFinder((uintptr_t)object, 0x150, 8,
+				int shared_ref_count = offsetFinder((uintptr_t)object, 0x80, 8,
+					pointerToRttiNamedBySubstring("std::_Ref_count<RobloxExtraSpace::Shared>"));
+				shared = shared_ref_count - 8;
+			}
+
+			// check if object points to the same Shared as original RobloxExtraSpace
+			// TODO: doesnt always work as it may be the only thread existing in vm
+			// TODO: broken
+			void findNext(const struct RobloxExtraSpace* object)
+			{
+				auto scObject = dereference((uintptr_t)object + scriptContext);
+
+				next = offsetFinder((uintptr_t)object, 0x80, 8,
+					[&](uintptr_t potentialNextPointer) -> bool {
+						if (auto nextExtraSpace = tryDereference(potentialNextPointer))
+						{
+							if (auto potentialScriptContext = tryDereference(nextExtraSpace.value() + scriptContext))
+							{
+								return potentialScriptContext == scriptContext;
+							}
+						}
+						return false;
+					});
+			}
+
+			// find with msvc rtti
+			void findScriptContext(const RobloxExtraSpace* object)
+			{
+				scriptContext = offsetFinder((uintptr_t)object, 0x80, 8,
 					pointerToRttiNamedBySubstring("RBX::ScriptContext"));
 			}
+
+			void findCapabilities(const RobloxExtraSpace* object)
+			{
+				capabilities = scriptContext + 8;
+			}
+
+			// from chained next find with msvc rtti
+			void findScript(const RobloxExtraSpace* object)
+			{
+				script = capabilities + 8;
+			}
+
+			void findActor(const RobloxExtraSpace* object)
+			{
+				actor = script + 8;
+			}
+
 
 			std::string print() const {
 				std::string ss = "struct RobloxExtraSpace {\n";
 				int currentOffset = 0;
 
+				if (identity != kInvalidOffset) {
+					printPadding(ss, currentOffset, identity);
+					ss += "\tint identity;\n";
+					currentOffset = identity + 4;
+				}
+
+				if (next != kInvalidOffset) {
+					printPadding(ss, currentOffset, next);
+					ss += "\tRobloxExtraSpace next;\n";
+					currentOffset = next + 8;
+				}
+
 				if (scriptContext != kInvalidOffset) {
 					printPadding(ss, currentOffset, scriptContext);
 					ss += "\tInstance* scriptContext;\n";
+					currentOffset = scriptContext + 8;
+				}
+
+				if (capabilities != kInvalidOffset) {
+					printPadding(ss, currentOffset, capabilities);
+					ss += "\tCapabilities capabilities;\n";
+					currentOffset = capabilities + 8;
+				}
+
+				if (script != kInvalidOffset) {
+					printPadding(ss, currentOffset, script);
+					ss += "\tInstance* script;\n";
+					currentOffset = script + 8;
+				}
+
+				if (actor != kInvalidOffset) {
+					printPadding(ss, currentOffset, actor);
+					ss += "\tInstance* actor;\n";
+					currentOffset = actor + 8;
 				}
 
 				ss += "};\n";
