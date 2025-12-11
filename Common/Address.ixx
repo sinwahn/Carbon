@@ -2,6 +2,8 @@ export module Address;
 
 export import <cstdint>;
 import <compare>;
+import <excpt.h>;
+import <utility>;
 
 export
 {
@@ -13,6 +15,7 @@ export
 
 		template <typename T>
 		constexpr Address(T* value) : value((uintptr_t)value) {}
+
 
 		constexpr void set(uintptr_t v) { value = v; }
 		constexpr uintptr_t get() const { return value; }
@@ -48,6 +51,39 @@ export
 
 		template <typename T = uintptr_t>
 		T& derefAt(ptrdiff_t offset) const { return *(T*)(value + offset); }
+
+		template <typename T = uintptr_t>
+		std::pair<bool, T*> tryDeref() const
+		{
+			if (isLocalValid())
+				return { true, (T*)value };
+			return { false, nullptr };
+		}
+
+		template <typename T = uintptr_t>
+		std::pair<bool, T*> tryDerefAt(ptrdiff_t offset) const
+		{
+			if (isLocalValid(value + offset))
+				return { true, (T*)(value + offset) };
+			return { false, {} };
+		}
+
+		bool isLocalValid() const {
+			return isLocalValid(value);
+		}
+
+		static bool isLocalValid(uintptr_t address)
+		{
+			__try {
+				*(volatile const char*)address;
+				return true;
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER) {
+				return false;
+			}
+		}
+
+		bool isNullptr() const { return value == 0; }
 
 		uintptr_t value = 0;
 	};
