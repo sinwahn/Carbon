@@ -261,6 +261,371 @@ do
 	end
 end
 
+local function dumpLuauPart1()
+	do
+		local tforeach = sections:getLib("table").foreach
+		local calls = getCallingFunctions(tforeach)
+
+		dumpInfo:newRegistrar("table_foreach")
+			:add("luaL_checktype", calls[1])
+			:add("luaL_checktype", calls[2])
+			:add("lua_pushnil", calls[3])
+			:add("lua_next", calls[4])
+			:add("lua_pushvalue", calls[5])
+			:add("lua_pushvalue", calls[6])
+			:add("lua_pushvalue", calls[7])
+			:add("lua_call", calls[8])
+			:add("lua_type", calls[9])
+			:add("lua_settop", calls[10])
+			:add("lua_next", calls[11])
+	end
+
+	do
+		local calls = getCallingFunctions(luaopen_base)
+
+		dumpInfo:newRegistrar("luaopen_base")
+			:add("lua_pushvalue", calls[1])
+			:add("lua_setfield", calls[2])
+			:add("luaL_register", calls[3])
+			:add("lua_pushlstring", calls[4])
+			:add("lua_setfield", calls[5])
+			:add("lua_pushcclosurek", calls[6])
+			:add("lua_pushcclosurek", calls[7])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaL_register"))
+
+		dumpInfo:newRegistrar("luaL_register")
+			:add("luaL_findtable", calls[1])
+			:add("lua_getfield", calls[2])
+			:add("lua_type", calls[3])
+			:add("lua_settop", calls[4])
+			:add("luaL_findtable", calls[5])
+			:add("lua_pushvalue", calls[6])
+			:add("lua_setfield", calls[7])
+			:add("lua_remove", calls[8])
+			:add("lua_pushcclosurek", calls[9])
+			:add("lua_setfield", calls[10])
+			:add("luaL_errorL", calls[11])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("lua_getfield"))
+
+		dumpInfo:newRegistrar("lua_getfield")
+			:add("luaC_barrierback", calls[1])
+			:add("pseudo2addr", calls[2])
+			:add("luaS_newlstr", calls[3])
+			:add("luaV_gettable", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaV_gettable"))
+
+		dumpInfo:newRegistrar("luaV_gettable")
+			:add("luaH_get", calls[1])
+			:add("luaT_gettm", calls[2])
+			:add("luaT_gettmbyobj", calls[3])
+			:add("callTMres", calls[4])
+			:add("luaG_indexerror", calls[5])
+			:add("luaG_runerrorL", calls[6])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaG_runerrorL"))
+
+		dumpInfo:newRegistrar("luaG_runerrorL")
+			:add("luaD_throw", calls[#calls])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaH_get"))
+
+		dumpInfo:newRegistrar("luaH_get")
+			:add("luaH_getstr", calls[1])
+			:add("luaH_getnum", calls[2])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaL_findtable"))
+
+		dumpInfo:newRegistrar("luaL_findtable")
+			:add("lua_pushvalue", calls[1])
+			:add("lua_pushlstring", calls[3])
+			:add("lua_rawget", calls[4])
+			:add("lua_type", calls[5])
+			:add("lua_settop", calls[6])
+			:add("lua_createtable", calls[7])
+			:add("lua_pushlstring", calls[8])
+			:add("lua_pushvalue", calls[9])
+			:add("lua_settable", calls[10])
+	end
+end
+
+local function dumpLuauPart3()
+	do
+		local calls = getCallingFunctions(base_lib.getfenv)
+
+		dumpInfo:newRegistrar("luaB_getfenv")
+			:add("getfunc", calls[1])
+			:add("lua_iscfunction", calls[2])
+			:add("lua_pushvalue", calls[3])
+			:add("lua_getfenv", calls[4])
+			:add("lua_setsafeenv", calls[5])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.setfenv)
+
+		dumpInfo:newRegistrar("luaB_setfenv")
+			:add("luaL_checktype", calls[1])
+			:add("getfunc", calls[2])
+			:add("lua_pushvalue", calls[3])
+			:add("lua_setsafeenv", calls[4])
+			:add("lua_isnumber", calls[5])
+			:add("lua_tonumberx", calls[6])
+			:add("lua_pushthread", calls[7])
+			:add("lua_insert", calls[8])
+			:add("lua_setfenv", calls[9])
+			:add("lua_iscfunction", calls[10])
+			:add("lua_setfenv", calls[11])
+			:add("luaL_errorL", calls[12])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.rawequal)
+
+		dumpInfo:newRegistrar("luaB_rawequal")
+			:add("luaL_checkany", calls[1])
+			:add("luaL_checkany", calls[2])
+			:add("lua_rawequal", calls[3])
+			:add("lua_pushboolean", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.rawget)
+
+		dumpInfo:newRegistrar("luaB_rawget")
+			:add("luaL_checktype", calls[1])
+			:add("luaL_checkany", calls[2])
+			:add("lua_settop", calls[3])
+			:add("lua_rawget", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.rawset)
+
+		dumpInfo:newRegistrar("luaB_rawset")
+			:add("luaL_checktype", calls[1])
+			:add("luaL_checkany", calls[2])
+			:add("luaL_checkany", calls[3])
+			:add("lua_settop", calls[4])
+			:add("lua_rawset", calls[5])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("lua_rawset"))
+
+		dumpInfo:newRegistrar("lua_rawset")
+			:add("pseudo2addr", calls[1])
+			:add("luaG_readonlyerror", calls[2])
+			:add("luaH_set", calls[3])
+			:add("luaC_barriertable", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.rawlen)
+
+		dumpInfo:newRegistrar("luaB_rawlen")
+			:add("lua_type", calls[1])
+			:add("lua_objlen", calls[2])
+			:add("lua_pushinteger", calls[3])
+			:add("luaL_argerrorL", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.type)
+
+		dumpInfo:newRegistrar("luaB_type")
+			:add("luaL_checkany", calls[1])
+			:add("lua_type", calls[2])
+			:add("lua_typename", calls[3])
+			:add("lua_pushstring", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.typeof)
+
+		dumpInfo:newRegistrar("luaB_typeof")
+			:add("luaL_checkany", calls[1])
+			:add("luaL_typename", calls[2])
+			:add("lua_pushstring", calls[3])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.next)
+
+		dumpInfo:newRegistrar("luaB_next")
+			:add("luaL_checktype", calls[1])
+			:add("lua_settop", calls[2])
+			:add("lua_next", calls[3])
+			:add("lua_pushnil", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.assert)
+
+		dumpInfo:newRegistrar("luaB_assert")
+			:add("luaL_checkany", calls[1])
+			:add("lua_toboolean", calls[2])
+			:add("luaL_optlstring", calls[3])
+			:add("luaL_errorL", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.select)
+
+		dumpInfo:newRegistrar("luaB_select")
+			:add("lua_gettop", calls[1])
+			:add("lua_type", calls[2])
+			:add("lua_tolstring", calls[3])
+			:add("lua_pushinteger", calls[4])
+			:add("luaL_checkinteger", calls[5])
+			:add("luaL_argerrorL", calls[6])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.tostring)
+
+		dumpInfo:newRegistrar("luaB_tostring")
+			:add("luaL_checkany", calls[1])
+			:add("luaL_tolstring", calls[2])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.newproxy)
+
+		dumpInfo:newRegistrar("luaB_newproxy")
+			:add("lua_type", calls[1])
+			:add("lua_toboolean", calls[2])
+			:add("lua_newuserdatatagged", calls[3])
+			:add("lua_createtable", calls[4])
+			:add("lua_setmetatable", calls[5])
+			:add("luaL_typeerrorL", calls[6])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.tonumber)
+
+		dumpInfo:newRegistrar("luaB_tonumber")
+			:add("luaL_optinteger", calls[1])
+			:add("lua_tonumberx", calls[2])
+			:add("lua_pushnumber", calls[3])
+			:add("luaL_checkany", calls[4])
+			:add("lua_pushnil", calls[5])
+			:add("luaL_checkstring", calls[6])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.getmetatable)
+
+		dumpInfo:newRegistrar("luaB_getmetatable")
+			:add("luaL_checkany", calls[1])
+			:add("lua_getmetatable", calls[2])
+			:add("lua_pushnil", calls[3])
+			:add("luaL_getmetafield", calls[4])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.setmetatable)
+
+		dumpInfo:newRegistrar("luaB_setmetatable")
+			:add("lua_type", calls[1])
+			:add("luaL_checktype", calls[2])
+			:add("luaL_getmetafield", calls[3])
+			:add("lua_settop", calls[4])
+			:add("lua_setmetatable", calls[5])
+			:add("luaL_typeerrorL", calls[6])
+			:add("luaL_errorL", calls[7])
+	end
+
+	do
+		local calls = getCallingFunctions(base_lib.error)
+
+		dumpInfo:newRegistrar("luaB_error")
+			:add("luaL_optinteger", calls[1])
+			:add("lua_settop", calls[2])
+			:add("lua_isstring", calls[3])
+			:add("luaL_where", calls[4])
+			:add("lua_pushvalue", calls[5])
+			:add("lua_concat", calls[6])
+			:add("lua_error", calls[7])
+	end
+
+	do
+		dumpInfo:add("luaL_typename", "luaA_toobject",
+			getCallingFunctionAt(dumpInfo:get("luaL_typename"), 1))
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaL_typeerrorL"))
+
+		dumpInfo:newRegistrar("luaL_typeerrorL")
+			:add("currfuncname", calls[1])
+			:add("luaA_toobject", calls[2])
+			:add("luaT_objtypename", calls[3])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("luaL_optinteger"))
+
+		dumpInfo:newRegistrar("luaL_optinteger")
+			:add("lua_type", calls[1])
+			:add("lua_tointegerx", calls[2])
+			:add("tag_error", calls[3])
+	end
+
+	do
+		local lua_type = dumpInfo:get("lua_type")
+		local leas = getLeaTargets(lua_type)
+
+		dumpInfo:add("lua_type lea", "luaO_nilobject", leas[1])
+
+		local calls = getCallingFunctions(lua_type)
+		dumpInfo:add("lua_type", "pseudo2addr", calls[1])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("getfunc"))
+
+		dumpInfo:newRegistrar("getfunc")
+			:add("lua_type", calls[1])
+			:add("lua_pushvalue", calls[2])
+			:add("luaL_optinteger", calls[3])
+			:add("luaL_checkinteger", calls[4])
+			:add("lua_getinfo", calls[5])
+	end
+
+	do
+		local calls = getCallingFunctions(dumpInfo:get("lua_pushcclosurek"))
+
+		dumpInfo:newRegistrar("lua_pushcclosurek")
+			:add("luaC_barrierback", calls[2])
+			:add("luaF_newCclosure", calls[3])
+	end
+	
+	do
+		local luaF_newLclosure = getNextFunction(dumpInfo:get("luaF_newCclosure"))
+		dumpInfo:add("luaF_newCclosure", "luaF_newLclosure", luaF_newLclosure.prologueRuntimeAddress)
+	end
+	
+	do
+		local luaF_newproto = getNextFunction(dumpInfo:get("luaF_newLclosure"));
+		dumpInfo:add("luaF_newLclosure", "luaF_newproto", luaF_newproto.prologueRuntimeAddress)
+	end
+end
+
 local function runDumpFromLibs()
 
 	do
