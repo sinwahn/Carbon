@@ -2,6 +2,7 @@ export module DumpInfo;
 
 import <iostream>;
 import <vector>;
+import <fstream>;
 
 import ExceptionBase;
 import Formatter;
@@ -98,7 +99,7 @@ export
 			return Registrar(name, *this);
 		}
 
-		void printRegistered(std::ostream& stream, const ApplicationSections& sections)
+		void printRegistered(std::ostream& stream, const ApplicationSections& sections) const
 		{
 			for (auto& [name, info] : registered)
 			{
@@ -115,6 +116,17 @@ export
 		}
 
 		const auto& getLibs() const { return libs; }
+
+		void exportToFile(const ApplicationSections& sections, const std::string& fileName) const
+		{
+			std::ofstream outFile(fileName);
+			if (!outFile)
+				raise("unable to open file", fileName, "for writing");
+
+			printRegistered(outFile, sections);
+
+			outFile.close();
+		}
 
 	private:
 
