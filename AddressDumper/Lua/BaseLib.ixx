@@ -88,14 +88,7 @@ int dumper_findSequence(lua_State* L)
 	return 1;
 }
 
-int getNextFunction(lua_State* L)
-{
-	auto& data = luaL_checkFunctionData(L, 1);
-	FunctionDataBridge::push(L, getNextFunction(data));
-	return 1;
-}
-
-int getCallInfo(lua_State* L)
+int dumper_getNextFunction(lua_State* L)
 {
 	auto& data = luaL_checkFunctionData(L, 1);
 	FunctionDataBridge::push(L, getNextFunction(data));
@@ -113,7 +106,7 @@ export const luaL_Reg baseLibrary[] = {
 	{"getCallingFunctions", dumper_getCallingFunctions},
 	{"getCallingFunctionAt", dumper_getCallingFunctionAt},
 	{"getLeaTargets", dumper_getLeaTargets},
-	{"getNextFunction", getNextFunction},
+	{"getNextFunction", dumper_getNextFunction},
 	{"findSequence", dumper_findSequence},
 	{"findSequences", dumper_findSequences},
 

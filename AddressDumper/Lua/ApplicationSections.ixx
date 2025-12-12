@@ -10,13 +10,15 @@ import Lua.Registrar;
 import Lua.LuaLibRef;
 
 import Memory;
-import ApplicationSections;
+export import ApplicationSections;
 
 int lua_ApplicationSections(lua_State* L);
 
 int ApplicationSections_tostring(lua_State* L);
 int ApplicationSections_initialize(lua_State* L);
 int ApplicationSections_getLibs(lua_State* L);
+int ApplicationSections_translatePointerNoThrow(lua_State* L);
+int ApplicationSections_translatePointer(lua_State* L);
 
 void register_ApplicationSections(BridgeRegistrar& registrar)
 {
@@ -39,6 +41,8 @@ export
 			{"__tostring", ApplicationSections_tostring},
 			{"initialize", ApplicationSections_initialize},
 			{"getLibs", ApplicationSections_getLibs},
+			{"translatePointerNoThrow", ApplicationSections_translatePointerNoThrow},
+			{"translatePointer", ApplicationSections_translatePointer},
 			{nullptr, nullptr}
 		};
 	};

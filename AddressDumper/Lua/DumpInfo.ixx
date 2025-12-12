@@ -9,7 +9,8 @@ import Lua.Bridge;
 import Lua.Registrar;
 
 import Memory;
-import DumpInfo;
+export import DumpInfo;
+import Lua.ApplicationSections;
 
 int lua_DumpInfo(lua_State* L);
 
@@ -69,6 +70,7 @@ int dumpInfo_newRegistrar(lua_State* L) {
 int dumpInfo_export(lua_State* L)
 {
 	auto& self = luaL_checkDumpInfo(L, 1);
-	self.exportToFile("dumpresult.txt");
+	auto& segnents = luaL_checkApplicationSections(L, 2);
+	self.exportToFile(segments, "dumpresult.txt");
 	return 0;
 }
