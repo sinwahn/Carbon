@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
+using System;
 
 namespace CarbonGui
 {
@@ -24,7 +25,13 @@ namespace CarbonGui
 
 		private async void InitializeWebViewAsync()
 		{
-			await CodeEditor.EnsureCoreWebView2Async(null);
+			try
+			{
+				await CodeEditor.EnsureCoreWebView2Async(null);
+			}catch(Exception excpetion)
+			{
+				MessageBox.Show(excpetion.Message, "Failed to initialize Microsoft WebView2.");
+			}
 			monacoEditor = new MonacoEditor(CodeEditor);
 		}
 
